@@ -1,19 +1,22 @@
 import React from 'react';
+import { Link, NavLink } from 'react-router-dom';
+import styles from './public-nav.module.css';
 
 export default function PublicNav() {
   return (
-    <nav className="bg-[#2b1818] w-full">
-      <div className="flex justify-between items-center h-12 w-full px-8">
-        <h1 className="text-white font-bold text-xl">第五人格分析器</h1>
-        <ul className="flex gap-6 text-slate-300">
-          <li className="hover:text-cyan-400 cursor-pointer">首頁</li>
-          <li className="hover:text-cyan-400 cursor-pointer">數據分析</li>
-        </ul>
-        <div className="flex items-center gap-2 pr-16">
-          <button className="bg-cyan-400 text-white px-4 py-2 rounded">登入</button>
-          <button className="bg-cyan-400 text-white px-4 py-2 rounded">註冊</button>
-        </div>
+    <div className={styles.publicNav}>
+      <div>
+        <h1>第五人格分析小工具</h1>
       </div>
-    </nav>
+      <div className={styles.introductionBtns}>
+        <NavLink to="/features">功能介紹</NavLink>
+        <NavLink to="/dashboard">儀表板展示</NavLink>
+        <NavLink to="/about">關於計畫</NavLink>
+      </div>
+      <div className={styles.loginSignInBtns}>
+        <Link to={{ pathname: "/signin", search: "?type=login" }} className={styles.loginBtn}>登入</Link>
+        <Link to={{ pathname: "/signin", search: "?type=register" }} className={styles.registerBtn}>註冊</Link>
+      </div>
+    </div>
   );
 }

@@ -1,0 +1,54 @@
+.publicNav {
+    background-color: #35191d;
+    width: 100%;
+    height: 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+    box-shadow: 0 0 1px #fff;
+}
+
+.publicNav h1 {
+    margin-left: 1rem;
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.introductionBtns {
+    display: flex;
+    gap: 1rem;
+}
+
+.introductionBtns a {
+    color: #7a6e70;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.introductionBtns a.active {
+    color: #fff;
+}
+
+.introductionBtns a:hover {
+    color: #d41132;
+}
+
+.loginSignInBtns a {
+    border-radius: 5px;
+    padding: 0.7rem 1.2rem;
+    color: #fff;
+    text-decoration: none;
+    margin-right: 1rem;
+}
+
+.loginBtn {
+    background-color: transparent;
+    box-shadow: 0 0 5px #fff;
+}
+
+.registerBtn {
+    background-color: #d41132;
+    margin-left: .3rem;
+}
