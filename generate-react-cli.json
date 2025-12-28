@@ -1,0 +1,12 @@
+{
+  "usesTypeScript": true,
+  "usesStyledComponents": false,
+  "usesCssModules": false,
+  "component": {
+    "default": {
+      "withStyle": true,
+      "withTest": false,
+      "withLazy": false
+    }
+  }
+}
