@@ -11,6 +11,7 @@ export default function PublicNav() {
       <div className={styles.introductionBtns}>
         <NavLink to="/features">功能介紹</NavLink>
         <NavLink to="/dashboard">儀表板展示</NavLink>
+        <NavLink to="/terms">使用條款</NavLink>
         <NavLink to="/about">關於計畫</NavLink>
       </div>
       <div className={styles.loginSignInBtns}>
