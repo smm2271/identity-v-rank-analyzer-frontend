@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import styles from './public-nav.module.css';
 
@@ -6,7 +5,7 @@ export default function PublicNav() {
   return (
     <div className={styles.publicNav}>
       <div>
-        <h1>第五人格分析小工具</h1>
+        <Link to="/"><h1>第五人格分析小工具</h1></Link>
       </div>
       <div className={styles.introductionBtns}>
         <NavLink to="/features">功能介紹</NavLink>

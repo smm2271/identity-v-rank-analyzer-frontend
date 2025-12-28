@@ -27,8 +27,12 @@
     font-weight: 600;
 }
 
-.introductionBtns a.active {
-    color: #fff;
+.introductionBtns a[aria-current="page"] {
+    color: #dedede;
+}
+
+.introductionBtns a[aria-current="page"]:hover {
+    color: #dedede;
 }
 
 .introductionBtns a:hover {
