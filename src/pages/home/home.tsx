@@ -3,7 +3,7 @@ import PublicNav from '../../share/public-nav/public-nav';
 
 export default function Home() {
   return (
-    <div>
+    <div className={styles.home}>
       <PublicNav />
       <h1>Home</h1>
     </div>
