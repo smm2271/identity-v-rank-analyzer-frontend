@@ -9,6 +9,10 @@
     box-shadow: 0 0 1px #fff;
 }
 
+.publicNav a {
+    text-decoration: none;
+}
+
 .publicNav h1 {
     margin-left: 1rem;
     color: #fff;
