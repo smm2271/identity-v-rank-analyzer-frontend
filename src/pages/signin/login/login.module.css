@@ -22,10 +22,6 @@
     color: #fff;
 }
 
-.loginForm div {
-    width: 80%;
-}
-
 .loginForm form {
     width: 80%;
     display: flex;
@@ -77,11 +73,46 @@ div.pwdtxt {
     border: none;
     outline: none;
     background-color: #fbbf24;
-    color: #fff;
-    padding: .5rem;
+    color: black;
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: .8rem;
     box-sizing: border-box;
     border-radius: .5rem;
     box-shadow: 0 0 5px #fff;
     cursor: pointer;
     margin-bottom: 2.5rem;
+}
+
+.rememberContainer {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.rememberContainer input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+}
+
+.inputContainer {
+    display: flex;
+    width: 100%;
+}
+
+div.inputContainer input {
+    width: 100%;
+    border: 1px solid #fff;
+    border-radius: .5rem 0 0 .5rem;
+    padding: .5rem;
+    box-sizing: border-box;
+}
+
+div.inputContainer i {
+    color: #fff;
+    border: 1px solid #fff;
+    padding: .5rem;
+    border-radius: 0 .5rem .5rem 0;
+    height: 100%;
+    box-shadow: 0 0 5px #fff;
 }
