@@ -1,0 +1,32 @@
+.publicNav {
+    background-color: #08080b;
+    width: 100%;
+    height: 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+    box-shadow: 0 0 1px #fff;
+}
+
+.publicNav a {
+    text-decoration: none;
+}
+
+.publicNav h1 {
+    margin-left: 1rem;
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.helpBtn {
+    background-color: transparent;
+    color: #ffffffea;
+    font-weight: 300;
+}
+
+.registerBtn {
+    background-color: #d41132;
+    margin-left: .3rem;
+}

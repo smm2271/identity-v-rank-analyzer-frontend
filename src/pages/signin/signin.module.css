@@ -1,0 +1,110 @@
+.signinPageContainer {
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, #1b1b1b 0%, #09090b 70%);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 切成左右 */
+.mainContainer {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    box-sizing: border-box;
+}
+
+/* 左邊 */
+.introductionContainer {
+    width: 60%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+
+.introductionContainer div {
+    margin: 2rem;
+}
+
+
+.introductionContainer h1 {
+    font-size: 4rem;
+    color: #fff;
+}
+
+.introductionContainer p {
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 1.5rem;
+    color: #fff;
+    margin-top: 1rem;
+}
+
+p.version {
+    /* 黃色調 */
+    display: inline-block;
+    font-size: 1rem;
+    color: rgba(255, 217, 0, 1);
+    margin-bottom: 1rem;
+    background-color: rgba(255, 217, 0, 0.6);
+    padding: 0.5rem 1rem;
+    border-radius: 1.2rem;
+    box-shadow: 0 0 3px rgba(255, 217, 0, 1);
+}
+
+/* 右邊 */
+.signinContainer {
+    width: 40%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.signinFormContainer {
+    width: 60%;
+    box-shadow: 0 0 3px #fff;
+    box-sizing: border-box;
+    background-color: #18181b;
+    border-radius: .7rem;
+    overflow: hidden;
+}
+
+.signinFormSwitchContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.signinFormSwitchContainer a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    padding: 1rem;
+    box-shadow: 0 0 2px #fff;
+    position: relative;
+}
+
+.signinFormSwitchContainer a.active {
+    box-shadow: 0 0 2px #fff;
+    position: relative;
+    background-color: rgba(255, 217, 0, 0.1);
+}
+
+.signinFormSwitchContainer a.active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    border-bottom: 2px solid rgba(255, 217, 0, 1);
+}
