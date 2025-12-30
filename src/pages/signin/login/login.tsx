@@ -5,7 +5,6 @@ import { useState } from "react";
 export default function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [remember, setRemember] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     return (
         <div className={styles.loginForm}>

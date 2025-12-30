@@ -31,6 +31,13 @@ export default function Signin() {
                             {type === "login" && <Login />}
                             {type === "register" && <Register />}
                         </div>
+                        <div className={styles.orContainer}>
+                            <p>或</p>
+                        </div>
+                        <div className={styles.oAuthButtonContainer}>
+                            <button className={styles.oAuthButtonDiscord}><i className="fa-brands fa-discord"></i>Discord</button>
+                            <button className={styles.oAuthButtonGoogle}><i className="fa-brands fa-google"></i>Google</button>
+                        </div>
                     </div>
                 </div>
             </div>
