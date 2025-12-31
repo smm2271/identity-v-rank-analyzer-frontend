@@ -1,0 +1,136 @@
+.registerForm {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.registerForm h1 {
+    display: block;
+    width: 80%;
+    text-align: left;
+    margin-bottom: .2rem;
+    color: #fff;
+    margin-top: 2rem;
+}
+
+.registerForm p {
+    width: 80%;
+    margin-bottom: .5rem;
+    color: #fff;
+}
+
+.registerForm form {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.registerForm form a {
+    color: #fff;
+    text-decoration: none;
+    float: right;
+}
+
+.registerForm form label {
+    color: #fff;
+}
+
+div.pwdtxt {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pwdtxt a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.registerForm form input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    color: #fff;
+    padding: .5rem;
+    box-sizing: border-box;
+    border-radius: .5rem;
+    box-shadow: 0 0 5px #fff;
+    margin-bottom: 1rem;
+}
+
+.registerForm form button {
+    width: 100%;
+    border: none;
+    outline: none;
+    background-color: #fbbf24;
+    color: black;
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: .8rem;
+    box-sizing: border-box;
+    border-radius: .5rem;
+    box-shadow: 0 0 5px #fff;
+    cursor: pointer;
+}
+
+.rememberContainer {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.rememberContainer input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+}
+
+.inputContainer {
+    display: flex;
+    width: 100%;
+}
+
+div.inputContainer input {
+    width: 100%;
+    border: 1px solid #fff;
+    border-radius: .5rem 0 0 .5rem;
+    padding: .5rem;
+    box-sizing: border-box;
+}
+
+div.inputContainer i {
+    color: #fff;
+    border: 1px solid #fff;
+    padding: .5rem;
+    border-radius: 0 .5rem .5rem 0;
+    height: 100%;
+    box-shadow: 0 0 5px #fff;
+}
+
+.checktos {
+    gap: .5rem;
+    margin-bottom: 1rem;
+}
+
+.checktos input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    margin-bottom: 0;
+}
+
+.checktos label {
+    color: #fff;
+}
+
+.checktos label a {
+    color: #fff;
+    text-decoration: none;
+    float: none;
+}
