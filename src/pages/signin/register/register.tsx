@@ -39,7 +39,7 @@ export default function Register() {
                 <div className={styles.checktos}>
                     <input type="checkbox" id="tos" checked={tosChecked} onChange={(e) => setTosChecked(e.target.checked)} />
                     <label htmlFor="tos">
-                        我已閱讀並同意 <a href="/docs?doc=tos">服務條款</a> 及 <a href="/docs?doc=privacy">隱私政策</a>
+                        我已閱讀並同意 <a href="/docs?doc=terms">服務條款</a> 及 <a href="/docs?doc=privacy">隱私政策</a>
                     </label>
                 </div>
                 <button>立即註冊</button>
