@@ -92,6 +92,7 @@ div.pwdtxt {
 .rememberContainer input[type="checkbox"] {
     width: 1rem;
     height: 1rem;
+    margin-bottom: 0.1rem;
 }
 
 .inputContainer {
