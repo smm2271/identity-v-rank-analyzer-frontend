@@ -9,11 +9,13 @@
 
 /* 切成左右 */
 .mainContainer {
-    height: 100%;
+    flex: 1;
     width: 100%;
     display: flex;
     flex-direction: row;
     box-sizing: border-box;
+    overflow: hidden;
+    /* Prevent global scroll if we want internal scroll */
 }
 
 /* 左邊 */
@@ -24,10 +26,11 @@
     flex-direction: column;
     justify-content: flex-end;
     align-items: flex-start;
+    padding: 3rem;
 }
 
 .introductionContainer div {
-    margin: 2rem;
+    margin: 0;
 }
 
 
@@ -62,15 +65,22 @@ p.version {
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 2rem;
+    overflow-y: auto;
+    /* 允許表單區域獨立滾動 */
 }
 
 .signinFormContainer {
-    width: 60%;
-    box-shadow: 0 0 3px #fff;
+    width: 100%;
+    max-width: 450px;
+    margin: auto 0;
+    /* 關鍵：在空間充足時垂直置中，空間不足時從頂部開始 */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
     background-color: #18181b;
     border-radius: .7rem;
     overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .signinFormSwitchContainer {
@@ -139,12 +149,11 @@ p.version {
 
 .oAuthButtonContainer {
     width: 100%;
-    padding: 0 10%;
+    padding: 1.5rem;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 1rem;
 }
 
 .oAuthButtonContainer button {
@@ -174,4 +183,87 @@ p.version {
 
 .oAuthButtonGoogle i {
     color: #DB4437;
+}
+
+@media (max-width: 1200px) {
+    .introductionContainer {
+        width: 50%;
+        padding: 2rem;
+    }
+
+    .signinContainer {
+        width: 50%;
+        padding: 1.5rem;
+    }
+
+    .introductionContainer h1 {
+        font-size: 3rem;
+    }
+
+    .introductionContainer p {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .mainContainer {
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    .introductionContainer {
+        width: 100%;
+        height: auto;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 3rem 1.5rem 1.5rem 1.5rem;
+    }
+
+    .introductionContainer h1 {
+        font-size: 2.5rem;
+    }
+
+    .introductionContainer p {
+        font-size: 1.1rem;
+    }
+
+    .signinContainer {
+        width: 100%;
+        height: auto;
+        padding: 1.5rem;
+        margin-bottom: 3rem;
+        align-items: center;
+        /* 行動版置中 */
+        overflow-y: visible;
+    }
+
+    .signinFormContainer {
+        width: 95%;
+        max-width: 420px;
+        margin-top: 1rem;
+        /* 增加頂部間距防止貼齊 nav */
+    }
+
+    .signinFormSwitchContainer a {
+        font-size: 1.2rem;
+        padding: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .introductionContainer h1 {
+        font-size: 2.2rem;
+    }
+
+    .oAuthButtonContainer {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+}
+
+@media (max-height: 700px) and (min-width: 993px) {
+    .introductionContainer h1 {
+        font-size: 3rem;
+    }
 }

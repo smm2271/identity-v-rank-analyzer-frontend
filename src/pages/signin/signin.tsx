@@ -27,7 +27,7 @@ export default function Signin() {
                             <Link to="?type=login" className={(type === "login") ? styles.active : ""}>登入</Link>
                             <Link to="?type=register" className={(type === "register") ? styles.active : ""}>註冊</Link>
                         </div>
-                        <div>
+                        <div className={styles.signinFormContentContainer}>
                             {type === "login" && <Login />}
                             {type === "register" && <Register />}
                         </div>

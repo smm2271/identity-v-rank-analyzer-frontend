@@ -30,3 +30,14 @@
     background-color: #d41132;
     margin-left: .3rem;
 }
+
+@media (max-width: 768px) {
+    .publicNav {
+        padding: 0 1rem;
+    }
+
+    .publicNav h1 {
+        font-size: 1rem;
+        margin-left: 0.5rem;
+    }
+}
