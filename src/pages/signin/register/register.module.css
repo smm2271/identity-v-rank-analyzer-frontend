@@ -81,16 +81,6 @@ div.pwdtxt {
     cursor: pointer;
 }
 
-.rememberContainer {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-}
-
-.rememberContainer input[type="checkbox"] {
-    width: 1rem;
-    height: 1rem;
-}
 
 .inputContainer {
     display: flex;
@@ -123,6 +113,7 @@ div.inputContainer i {
     width: 1rem;
     height: 1rem;
     margin-bottom: 0;
+    margin-right: .5rem;
 }
 
 .checktos label {
