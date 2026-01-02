@@ -1,5 +1,4 @@
 import styles from '../docs.module.css';
-import { Link } from 'react-router-dom';
 
 export default function Privacy() {
     return (
@@ -14,7 +13,7 @@ export default function Privacy() {
                 <hr className={styles.divider} />
 
                 <section className={styles.section}>
-                    <h2>一、資料蒐集範圍</h2>
+                    <h2 id="scope">一、資料蒐集範圍</h2>
 
                     <div className={styles.subsection}>
                         <h3>1. 帳戶資訊</h3>
@@ -45,7 +44,7 @@ export default function Privacy() {
                 <hr className={styles.divider} />
 
                 <section className={styles.section}>
-                    <h2>二、帳號與密碼安全</h2>
+                    <h2 id="security">二、帳號與密碼安全</h2>
                     <ul className={styles.list}>
                         <li>密碼 <strong>絕不儲存明文</strong>，傳輸後即進行雜湊（Hashing）</li>
                         <li>使用 HTTPS / TLS 加密傳輸</li>
@@ -55,14 +54,14 @@ export default function Privacy() {
                 <hr className={styles.divider} />
 
                 <section className={styles.section}>
-                    <h2>三、不進行去識別化</h2>
+                    <h2 id="identification">三、不進行去識別化</h2>
                     <p>本服務<strong>不會</strong>對使用者名稱或玩家 ID 去識別化。開發者及授權展示對象可直接查閱原始對局資料與身份關聯。</p>
                 </section>
 
                 <hr className={styles.divider} />
 
                 <section className={styles.section}>
-                    <h2>四、研究分析與成果展示授權</h2>
+                    <h2 id="authorization">四、研究分析與成果展示授權</h2>
 
                     <div className={styles.subsection}>
                         <h3>1. 研究分析權</h3>
@@ -85,7 +84,7 @@ export default function Privacy() {
                 <hr className={styles.divider} />
 
                 <section className={styles.section}>
-                    <h2>五、資料保留與刪除請求</h2>
+                    <h2 id="retention">五、資料保留與刪除請求</h2>
                     <ul className={styles.list}>
                         <li>原始位移與行為資料保留 30–60 天</li>
                         <li>過期後僅保留精簡對局結果</li>
@@ -93,11 +92,6 @@ export default function Privacy() {
                         <li>已用於研究分析或展示之資料不溯及刪除</li>
                     </ul>
                 </section>
-
-                <footer className={styles.footerLinks}>
-                    <Link to="?doc=terms">服務條款（Terms of Service）</Link>
-                    <Link to="?doc=disclaimer">法律免責聲明（Legal Disclaimer）</Link>
-                </footer>
             </article>
         </div>
     );

@@ -1,5 +1,4 @@
 import styles from '../docs.module.css';
-import { Link } from 'react-router-dom';
 export default function Terms() {
     return (
         <div className={styles.container}>
@@ -13,7 +12,7 @@ export default function Terms() {
                 <hr className={styles.divider} />
 
                 <section className={styles.section}>
-                    <h2>一、專案性質與聲明</h2>
+                    <h2 id="nature">一、專案性質與聲明</h2>
                     <p>本專案 <strong>{'{TBD: 專案名稱}'}</strong>（以下簡稱「本服務」）由開發者 Zalic.Su 基於個人自主學習與研究目的所開發之非商業性工具。</p>
 
                     <div className={styles.subsection}>
@@ -40,7 +39,7 @@ export default function Terms() {
                 <hr className={styles.divider} />
 
                 <section className={styles.section}>
-                    <h2>二、文件關係與優先順序</h2>
+                    <h2 id="files">二、文件關係與優先順序</h2>
                     <p>本服務條款為最上位規範文件。使用者於使用本服務時，即視為同意並受下列文件之拘束：</p>
                     <ul className={styles.list}>
                         <li>《隱私權政策（Privacy Policy）》</li>
@@ -52,7 +51,7 @@ export default function Terms() {
                 <hr className={styles.divider} />
 
                 <section className={styles.section}>
-                    <h2>三、服務使用規範</h2>
+                    <h2 id="rules">三、服務使用規範</h2>
                     <p>使用者不得：</p>
                     <ul className={styles.list}>
                         <li>上傳非法或侵權內容</li>
@@ -66,14 +65,14 @@ export default function Terms() {
                 <hr className={styles.divider} />
 
                 <section className={styles.section}>
-                    <h2>四、服務變更與終止</h2>
+                    <h2 id="termination">四、服務變更與終止</h2>
                     <p>開發者可隨研究進度、技術調整或學期結束調整功能、暫停或終止服務。本服務不保證長期存取或永久資料保存。</p>
                 </section>
 
                 <hr className={styles.divider} />
 
                 <section className={styles.section}>
-                    <h2>五、責任限制與法律適用</h2>
+                    <h2 id="liability">五、責任限制與法律適用</h2>
                     <p>開發者不對使用或無法使用本服務所產生之任何損害負責（法律允許範圍內）。</p>
                     <p>條款部分無效不影響其他條款效力。</p>
                     <p>條款解釋與適用依 <strong>中華民國（臺灣）法律</strong>。</p>
@@ -82,14 +81,9 @@ export default function Terms() {
                 <hr className={styles.divider} />
 
                 <section className={styles.section}>
-                    <h2>六、條款修改</h2>
+                    <h2 id="changes">六、條款修改</h2>
                     <p>本條款可隨研究與技術需求修訂，使用者於修訂後繼續使用本服務，即視為同意更新條款。</p>
                 </section>
-
-                <footer className={styles.footerLinks}>
-                    <Link to={'?doc=privacy'}>隱私權政策（Privacy Policy）</Link>
-                    <Link to={'?doc=disclaimer'}>法律免責聲明（Legal Disclaimer）</Link>
-                </footer>
             </article>
         </div>
     );

@@ -1,7 +1,21 @@
+.outlayContainer {
+    display: flex;
+    padding-top: 4rem;
+    /* 為固定導航欄預留空間 */
+    height: 100vh;
+    box-sizing: border-box;
+}
+
+.contentContainer {
+    flex: 1;
+    overflow-y: auto;
+    background-color: #ffffff;
+}
+
 .container {
     max-width: 800px;
     margin: 0 auto;
-    padding: 4rem 2rem;
+    padding: 2rem 2rem 4rem 2rem;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: #2d3436;
     line-height: 1.7;
@@ -61,6 +75,8 @@
     margin-bottom: 1.5rem;
     display: flex;
     align-items: center;
+    scroll-margin-top: 6rem;
+    /* 防止被固定導航欄遮住 */
 }
 
 .subsection {
@@ -74,6 +90,7 @@
     font-weight: 600;
     color: #2d3436;
     margin-bottom: 0.75rem;
+    scroll-margin-top: 6rem;
 }
 
 .list {
@@ -130,16 +147,110 @@
     opacity: 1;
 }
 
-@media (max-width: 640px) {
+/* 手機版 */
+@media (max-width: 1008px) {
+    .outlayContainer {
+        flex-direction: column;
+        height: auto;
+        padding-top: 4rem;
+    }
+
+    .contentContainer {
+        height: auto;
+        overflow-y: visible;
+    }
+
+    .switch {
+        width: 100%;
+        background: #ffffff;
+        padding: 0.75rem;
+        display: flex;
+        gap: 0.5rem;
+        position: sticky;
+        top: 4rem;
+        z-index: 10;
+        border-bottom: 1px solid #f1f2f6;
+        box-sizing: border-box;
+    }
+
+    .switch a {
+        flex: 1;
+        text-align: center;
+        border-radius: 8px;
+        padding: 0.6rem 0.4rem;
+        background-color: #f1f2f6;
+        color: #636e72;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .switch a.activeLink {
+        background-color: #0984e3;
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(9, 132, 227, 0.2);
+    }
+
     .container {
-        padding: 2rem 1rem;
+        padding: 1.5rem 1rem 4rem 1rem;
     }
 
     .header h1 {
-        font-size: 2rem;
+        font-size: 1.8rem;
     }
 
     .section h2 {
-        font-size: 1.3rem;
+        font-size: 1.25rem;
+        scroll-margin-top: 8.5rem;
+        /* nav(4rem) + switch(4.5rem) */
+    }
+
+    .subSwitch {
+        display: none;
+    }
+}
+
+@media (min-width: 1009px) {
+    .switch {
+        position: fixed;
+        top: 4.5rem;
+        left: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin: auto;
+    }
+
+    .switch a {
+        flex: 1;
+        color: gray;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .switch a.activeLink {
+        color: #000000;
+        font-weight: 600;
+    }
+
+    .subSwitch {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding-left: 1rem;
+        margin-top: -0.5rem;
+        margin-bottom: 0.5rem;
+        border-left: 1px solid #dfe6e9;
+    }
+
+    .subSwitch a {
+        font-size: 0.85rem;
+        color: #636e72;
+    }
+
+    .subSwitch a:hover {
+        color: #0984e3;
     }
 }
