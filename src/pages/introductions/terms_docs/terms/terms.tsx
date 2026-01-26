@@ -22,7 +22,7 @@ export default function Terms() {
 
                     <div className={styles.subsection}>
                         <h3>2. 非違規程式聲明</h3>
-                        <p>本服務僅透過 CLI 工具解析使用者本機端遊戲資料目錄中所產生的對局錄像，<strong>以離線方式分析，不修改遊戲程式、不干擾封包，也不影響對局行為</strong>，<strong>不屬外掛或作弊程式</strong>。</p>
+                        <p>本服務僅透過 Client 工具解析使用者本機端遊戲資料目錄中所產生的對局錄像，<strong>以離線方式分析，不修改遊戲程式、不干擾封包，也不影響對局行為</strong>，<strong>不屬外掛或作弊程式</strong>。</p>
                     </div>
 
                     <div className={styles.subsection}>
