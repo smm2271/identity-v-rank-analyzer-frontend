@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+
+.container {
+    min-height: 100vh;
+    background-color: #1a0b0d;
+    background-image:
+        radial-gradient(at 0% 0%, hsla(353, 75%, 20%, 0.3) 0, transparent 50%),
+        radial-gradient(at 50% 0%, hsla(353, 75%, 15%, 0.2) 0, transparent 50%),
+        radial-gradient(at 100% 0%, hsla(353, 75%, 20%, 0.3) 0, transparent 50%);
+    padding: 7rem 2rem 4rem;
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.about {
+    max-width: 800px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 3.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    margin-bottom: 2rem;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 2.5rem;
+    text-align: center;
+    letter-spacing: -0.02em;
+    background: #d41132;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(212, 17, 50, 0.6);
+}
+
+.about h2 {
+    font-size: 1.6rem;
+    color: #d41132;
+    margin: 2.5rem 0 1.2rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.about h2::before {
+    content: '';
+    width: 4px;
+    height: 1.6rem;
+    background-color: #d41132;
+    border-radius: 2px;
+}
+
+.about p {
+    line-height: 1.8;
+    font-size: 1.15rem;
+    color: #b0b0b0;
+    margin-bottom: 1.5rem;
+    font-weight: 300;
+}
+
+.about h3 {
+    font-size: 1.3rem;
+    color: #fff;
+    margin: 2rem 0 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.about h3::before {
+    content: "◇";
+    margin-right: 0.75rem;
+    color: #d41132;
+    font-size: 0.9rem;
+}
+
+.about ul {
+    list-style: none;
+    padding-left: 3rem;
+    margin-bottom: 1.5rem;
+}
+
+.about a {
+    color: #d41132;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.about a:hover {
+    color: #fff;
+}
+
+.about li {
+    margin-bottom: 0.75rem;
+    position: relative;
+    color: #dedede;
+    font-size: 1.1rem;
+}
+
+.about li::before {
+    content: "•";
+    color: #d41132;
+    position: absolute;
+    left: -1.2rem;
+    font-weight: bold;
+}
+
+/* Hover effects for depth */
+.about:hover {
+    border-color: rgba(212, 17, 50, 0.3);
+    transition: border-color 0.4s ease;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 6rem 1.5rem 3rem;
+    }
+
+    .about {
+        padding: 2rem;
+    }
+
+    .title {
+        font-size: 2.2rem;
+    }
+}
