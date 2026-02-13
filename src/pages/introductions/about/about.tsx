@@ -18,22 +18,34 @@ export default function About() {
                 <h3>前端</h3>
                 <ul>
                     <li>React</li>
+                    <li>TypeScript</li>
+                    <li>Zustand</li>
                 </ul>
                 <h3>後端</h3>
                 <ul>
+                    <li>Python</li>
                     <li>FastAPI</li>
                 </ul>
                 <h3>資料庫</h3>
                 <ul>
                     <li>PostgreSQL</li>
                 </ul>
-                <h3>Client Tool</h3>
+                <h3>Client Tool (自動化數據採集工具) </h3>
                 <ul>
                     <li>Python</li>
+                    <li>Watchdog</li>
+                    <li>Pickle</li>
                 </ul>
                 <h3>部署</h3>
                 <ul>
-                    <li>Azure</li>
+                    <li>自家Server ヾ(≧▽≦*)o</li>
+                    <li>Nginx Proxy Manager</li>
+                    <li>Cloudflare</li>
+                </ul>
+                <h3>第三方登入(OAuth2)</h3>
+                <ul>
+                    <li>Google</li>
+                    <li>Discord</li>
                 </ul>
             </div>
             <div className={styles.about}>
