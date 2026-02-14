@@ -5,24 +5,38 @@
     z-index: 1000;
     background-color: #35191d;
     width: 100%;
-    height: 4rem;
+    min-height: 4rem;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 0 2rem;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0 1.5rem;
     box-shadow: 0 0 1px #fff;
 }
-
 
 .publicNav a {
     text-decoration: none;
 }
 
+.brandRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
 .publicNav h1 {
-    margin-left: 1rem;
+    margin-left: 0.5rem;
     color: #fff;
     font-size: 1.2rem;
     font-weight: 600;
+}
+
+.navLinks {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-left: auto;
 }
 
 .introductionBtns {
@@ -48,6 +62,11 @@
     color: #d41132;
 }
 
+.loginSignInBtns {
+    display: flex;
+    align-items: center;
+}
+
 .loginSignInBtns a {
     border-radius: 5px;
     padding: 0.7rem 1.2rem;
@@ -64,4 +83,100 @@
 .registerBtn {
     background-color: #d41132;
     margin-left: .3rem;
+}
+
+.burger {
+    display: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    gap: 0;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.burger span {
+    width: 18px;
+    height: 2px;
+    background: #fff;
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -6px);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.burger span:nth-child(2) {
+    transform: translate(-50%, -0px);
+}
+
+.burger span:nth-child(3) {
+    transform: translate(-50%, 6px);
+}
+
+.burgerOpen span:nth-child(1) {
+    transform: translate(-50%, 0) rotate(45deg);
+}
+
+.burgerOpen span:nth-child(2) {
+    opacity: 0;
+}
+
+.burgerOpen span:nth-child(3) {
+    transform: translate(-50%, 0) rotate(-45deg);
+}
+
+@media (max-width: 900px) {
+    .publicNav {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.25rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .navLinks {
+        display: none;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 0 0 0.75rem 0;
+        margin-left: 0;
+    }
+
+    .navLinks.open {
+        display: flex;
+    }
+
+    .introductionBtns {
+        width: 100%;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .introductionBtns a {
+        width: 100%;
+        padding: 0.35rem 0;
+    }
+
+    .loginSignInBtns {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 0.5rem;
+    }
+
+    .loginSignInBtns a {
+        margin-right: 0;
+        padding: 0.7rem 1rem;
+    }
+
+    .burger {
+        display: flex;
+        flex-direction: column;
+    }
 }
