@@ -141,16 +141,28 @@
     }
 
     .navLinks {
-        display: none;
+        display: flex;
         flex-direction: column;
         align-items: flex-start;
-        gap: 1rem;
-        padding: 0 0 0.75rem 0;
+        gap: 0;
+        padding: 0;
         margin-left: 0;
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        visibility: hidden;
+        transform: translateY(-6px);
+        transition: max-height 0.3s ease, opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s;
     }
 
     .navLinks.open {
-        display: flex;
+        max-height: 480px;
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        gap: 1rem;
+        padding: 0 0 0.75rem 0;
+        transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.25s ease;
     }
 
     .introductionBtns {
