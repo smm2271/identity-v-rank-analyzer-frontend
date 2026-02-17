@@ -263,7 +263,7 @@
 }
 
 /* 手機版 */
-@media (max-width: 1008px) {
+@media (max-width: 767px) {
     .outlayContainer {
         flex-direction: column;
         height: auto;
@@ -329,6 +329,102 @@
         display: none;
     }
 }
+
+/* 平板版 (768px - 1008px) */
+@media (min-width: 768px) and (max-width: 1008px) {
+    .outlayContainer {
+        flex-direction: column;
+        height: auto;
+        padding-top: 4rem;
+    }
+
+    .contentContainer {
+        height: auto;
+        overflow-y: visible;
+        padding: 2rem 1.5rem;
+    }
+
+    .container {
+        max-width: 100%;
+        padding: 2.5rem 2rem 4rem;
+    }
+
+    /* 平板橫向導航 - 顯示完整導航而非漢堡選單 */
+    .switch {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.35);
+        padding: 1rem 1.5rem;
+        display: flex;
+        gap: 0.75rem;
+        position: sticky;
+        top: 4rem;
+        z-index: 10;
+        border-bottom: 1px solid rgba(212, 17, 50, 0.25);
+        box-sizing: border-box;
+        backdrop-filter: blur(8px);
+        justify-content: center;
+    }
+
+    .switch a {
+        flex: 0 1 auto;
+        min-width: 140px;
+        text-align: center;
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        background-color: rgba(255, 255, 255, 0.06);
+        color: #c7c7cc;
+        font-size: 0.95rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        border: 1px solid rgba(212, 17, 50, 0.2);
+    }
+
+    .switch a:hover {
+        border-color: rgba(212, 17, 50, 0.35);
+        color: #ffffff;
+        background-color: rgba(255, 255, 255, 0.09);
+    }
+
+    .switch a.activeLink {
+        background: linear-gradient(135deg, #d41132, #7f0c1f);
+        color: #ffffff;
+        box-shadow: 0 10px 24px rgba(212, 17, 50, 0.3);
+        border-color: transparent;
+    }
+
+    .header h1 {
+        font-size: 2.2rem;
+    }
+
+    .markdown h1 {
+        font-size: 2.2rem;
+    }
+
+    .section h2 {
+        font-size: 1.4rem;
+        scroll-margin-top: 7rem;
+    }
+
+    .markdown h2 {
+        font-size: 1.4rem;
+    }
+
+    .markdown h3 {
+        font-size: 1.15rem;
+    }
+
+    /* 隱藏子導航以節省垂直空間 */
+    .subSwitch {
+        display: none;
+    }
+
+    .docItem {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
 
 @media (min-width: 1009px) {
     .switch {
@@ -398,5 +494,11 @@
     .subSwitch a:hover {
         color: #ffffff;
         transform: translateX(4px);
+    }
+
+    /* 為固定側邊欄留出空間 */
+    .contentContainer {
+        margin-left: 272px;
+        /* sidebar width (240px) + left position (1rem) + gap (1rem) */
     }
 }
