@@ -2,7 +2,6 @@
 
 .outlayContainer {
     display: flex;
-    padding-top: 4rem;
     height: 100vh;
     box-sizing: border-box;
     background-color: #12080b;
@@ -267,7 +266,6 @@
     .outlayContainer {
         flex-direction: column;
         height: auto;
-        padding-top: 4rem;
     }
 
     .contentContainer {
@@ -282,7 +280,7 @@
         display: flex;
         gap: 0.5rem;
         position: sticky;
-        top: 7rem;
+        top: 4rem;
         z-index: 10;
         border-bottom: 1px solid rgba(212, 17, 50, 0.25);
         box-sizing: border-box;
@@ -335,7 +333,6 @@
     .outlayContainer {
         flex-direction: column;
         height: auto;
-        padding-top: 4rem;
     }
 
     .contentContainer {
@@ -429,7 +426,7 @@
 @media (min-width: 1009px) {
     .switch {
         position: fixed;
-        top: 7.5rem;
+        top: 1rem;
         left: 1rem;
         display: flex;
         flex-direction: column;
