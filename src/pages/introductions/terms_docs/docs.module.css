@@ -279,9 +279,6 @@
         padding: 0.75rem;
         display: flex;
         gap: 0.5rem;
-        position: sticky;
-        top: 4rem;
-        z-index: 10;
         border-bottom: 1px solid rgba(212, 17, 50, 0.25);
         box-sizing: border-box;
         backdrop-filter: blur(8px);
@@ -353,9 +350,6 @@
         padding: 1rem 1.5rem;
         display: flex;
         gap: 0.75rem;
-        position: sticky;
-        top: 4rem;
-        z-index: 10;
         border-bottom: 1px solid rgba(212, 17, 50, 0.25);
         box-sizing: border-box;
         backdrop-filter: blur(8px);
@@ -426,7 +420,7 @@
 @media (min-width: 1009px) {
     .switch {
         position: fixed;
-        top: 1rem;
+        top: 5rem;
         left: 1rem;
         display: flex;
         flex-direction: column;
