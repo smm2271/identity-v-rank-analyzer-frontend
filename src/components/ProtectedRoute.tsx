@@ -1,11 +1,11 @@
 import { Navigate, Outlet } from 'react-router-dom';
+import { useUserAuthStore } from '../service/user_auth.service';
 
 const ProtectedRoute = () => {
-    // 這裡檢查是否存在 Token，通常存放在 localStorage 或 Cookie 中
-    const token = localStorage.getItem('user_token');
+    const isAuthenticated = useUserAuthStore((s) => s.isAuthenticated);
 
-    // 如果沒有 Token，就重新導向到登入頁面
-    return token ? <Outlet /> : <Navigate to="/signin" replace />;
+    // 如果沒有登入，就重新導向到登入頁面
+    return isAuthenticated ? <Outlet /> : <Navigate to="/signin?type=login" replace />;
 };
 
 export default ProtectedRoute;

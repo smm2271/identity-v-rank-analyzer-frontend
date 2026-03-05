@@ -9,6 +9,9 @@ import Features from './pages/introductions/features/features';
 import Docs from './pages/introductions/terms_docs/docs';
 import ProtectedRoute from './components/ProtectedRoute';
 
+// OAuth 回呼頁面 (延遲載入)
+const OAuthCallback = lazy(() => import('./pages/signin/oauth-callback/oauth-callback'));
+
 // 裡網站組件 (延遲載入：只有進到該頁面才會下載程式碼，優化效能)
 // const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
 // const MatchHistory = lazy(() => import('./pages/dashboard/MatchHistory'));
@@ -26,6 +29,7 @@ function App() {
           <Route path="/features" element={<Features />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/about" element={<About />} />
+          <Route path="/auth/callback" element={<OAuthCallback />} />
 
           {/* --- 受保護路由 (裡網站) --- */}
           {/* 只有登入後才能進入 /app 開頭的路由 */}
