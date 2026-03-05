@@ -116,3 +116,16 @@ div.inputContainer i {
     height: 100%;
     box-shadow: 0 0 5px #fff;
 }
+
+.errorMessage {
+    color: #ef4444;
+    font-size: 0.85rem;
+    width: 100%;
+    text-align: center;
+    margin: 0;
+}
+
+.loginForm form button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

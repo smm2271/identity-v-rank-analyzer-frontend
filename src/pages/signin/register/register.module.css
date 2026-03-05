@@ -125,3 +125,16 @@ div.inputContainer i {
     text-decoration: none;
     float: none;
 }
+
+.errorMessage {
+    color: #ef4444;
+    font-size: 0.85rem;
+    width: 100%;
+    text-align: center;
+    margin: 0;
+}
+
+.registerForm form button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
