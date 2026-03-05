@@ -1,12 +1,47 @@
 import { useSearchParams, Link } from "react-router-dom";
+import { useState } from "react";
 import SigninNav from "../../share/signin-nav/signin-nav";
 import styles from "./signin.module.css";
 import Login from "./login/login";
 import Register from "./register/register";
+import { getOAuthAuthorizeUrl } from "../../service/auth.service";
+import { ApiError } from "../../service/api";
+
+/** 前端 OAuth 回呼路徑 */
+const OAUTH_CALLBACK_PATH = "/auth/callback";
 
 export default function Signin() {
     const [searchParams] = useSearchParams();
     const type = searchParams.get("type");
+
+    const [oauthLoading, setOauthLoading] = useState<string | null>(null);
+    const [oauthError, setOauthError] = useState<string | null>(null);
+
+    async function handleOAuthLogin(provider: string) {
+        setOauthLoading(provider);
+        setOauthError(null);
+
+        try {
+            const redirectUri = `${window.location.origin}${OAUTH_CALLBACK_PATH}`;
+            const { authorization_url, state } = await getOAuthAuthorizeUrl(provider, redirectUri);
+
+            // 將 state、provider、redirect_uri 暫存到 sessionStorage（供 callback 頁面驗證用）
+            sessionStorage.setItem("oauth_state", state);
+            sessionStorage.setItem("oauth_provider", provider);
+            sessionStorage.setItem("oauth_redirect_uri", redirectUri);
+
+            // 導向 OAuth 供應商授權頁面
+            window.location.href = authorization_url;
+        } catch (err) {
+            setOauthLoading(null);
+            if (err instanceof ApiError) {
+                setOauthError(err.detail);
+            } else {
+                setOauthError("無法取得授權連結，請稍後再試");
+            }
+        }
+    }
+
     return (
         <div className={styles.signinPageContainer}>
             <SigninNav />
@@ -35,9 +70,26 @@ export default function Signin() {
                             <p>或</p>
                         </div>
                         <div className={styles.oAuthButtonContainer}>
-                            <button className={styles.oAuthButtonDiscord}><i className="fa-brands fa-discord"></i>Discord</button>
-                            <button className={styles.oAuthButtonGoogle}><i className="fa-brands fa-google"></i>Google</button>
+                            <button
+                                className={styles.oAuthButtonDiscord}
+                                onClick={() => handleOAuthLogin("discord")}
+                                disabled={oauthLoading !== null}
+                            >
+                                <i className="fa-brands fa-discord"></i>
+                                {oauthLoading === "discord" ? "連線中…" : "Discord"}
+                            </button>
+                            <button
+                                className={styles.oAuthButtonGoogle}
+                                onClick={() => handleOAuthLogin("google")}
+                                disabled={oauthLoading !== null}
+                            >
+                                <i className="fa-brands fa-google"></i>
+                                {oauthLoading === "google" ? "連線中…" : "Google"}
+                            </button>
                         </div>
+                        {oauthError && (
+                            <p className={styles.oAuthError}>{oauthError}</p>
+                        )}
                     </div>
                 </div>
             </div>

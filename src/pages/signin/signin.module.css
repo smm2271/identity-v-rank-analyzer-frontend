@@ -267,3 +267,18 @@ p.version {
         font-size: 3rem;
     }
 }
+
+/* ── OAuth Error ── */
+.oAuthError {
+    color: #ef4444;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 0 1.5rem 1rem;
+    margin: 0;
+}
+
+/* ── Disabled button ── */
+.oAuthButtonContainer button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
