@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 // 表網站組件 (保持同步載入，因為是首頁)
@@ -7,7 +7,6 @@ import Signin from './pages/signin/signin';
 import About from './pages/introductions/about/about';
 import Features from './pages/introductions/features/features';
 import Docs from './pages/introductions/terms_docs/docs';
-import ProtectedRoute from './components/ProtectedRoute';
 
 // OAuth 回呼頁面 (延遲載入)
 const OAuthCallback = lazy(() => import('./pages/signin/oauth-callback/oauth-callback'));
