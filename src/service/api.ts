@@ -20,12 +20,24 @@ async function handleResponse<T>(response: Response): Promise<T> {
     return response.json() as Promise<T>;
 }
 
+function buildUrl(path: string): URL {
+    const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+    const pathUrl = path.startsWith('/') ? path : `/${path}`;
+    const fullPath = `${baseUrl}${pathUrl}`;
+    
+    // 如果是完整的 URL (http開頭) 則直接轉解析；若是相對路徑 (/api) 則補上 origin
+    if (fullPath.startsWith('http')) {
+        return new URL(fullPath);
+    }
+    return new URL(fullPath, window.location.origin);
+}
+
 export async function get<T>(
     path: string,
     params?: Record<string, string>,
     headers?: Record<string, string>,
 ): Promise<T> {
-    const url = new URL(path, API_BASE_URL);
+    const url = buildUrl(path);
     if (params) {
         Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
     }
@@ -41,7 +53,7 @@ export async function post<T>(
     body?: unknown,
     headers?: Record<string, string>,
 ): Promise<T> {
-    const url = new URL(path, API_BASE_URL);
+    const url = buildUrl(path);
     const response = await fetch(url.toString(), {
         method: "POST",
         headers: { "Content-Type": "application/json", ...headers },
