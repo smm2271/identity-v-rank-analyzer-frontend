@@ -1,3 +1,5 @@
+import { useUserAuthStore } from "./user_auth.service";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
 
 export class ApiError extends Error {
@@ -11,6 +13,47 @@ export class ApiError extends Error {
         this.detail = detail;
     }
 }
+
+// ─── Token Refresh 機制 ──────────────────────────────────────────
+
+/** 防止多個 401 同時觸發重複 refresh */
+let refreshPromise: Promise<boolean> | null = null;
+
+/**
+ * 嘗試用 Refresh Token 換發新的 Token Pair。
+ * 回傳 true 表示刷新成功，false 表示失敗（需登出）。
+ */
+async function tryRefreshToken(): Promise<boolean> {
+    const { refreshToken, setTokens, clearAuth } = useUserAuthStore.getState();
+
+    if (!refreshToken) {
+        clearAuth();
+        return false;
+    }
+
+    try {
+        const url = buildUrl("/auth/refresh");
+        const response = await fetch(url.toString(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refresh_token: refreshToken }),
+        });
+
+        if (!response.ok) {
+            clearAuth();
+            return false;
+        }
+
+        const data = await response.json();
+        setTokens(data.access_token, data.refresh_token);
+        return true;
+    } catch {
+        clearAuth();
+        return false;
+    }
+}
+
+// ─── 核心請求處理 ────────────────────────────────────────────────
 
 async function handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
@@ -32,6 +75,39 @@ function buildUrl(path: string): URL {
     return new URL(fullPath, window.location.origin);
 }
 
+/**
+ * 帶有 401 自動刷新能力的 fetch 封裝。
+ * 當收到 401 時自動嘗試 refresh token，成功後以新 token 重試原請求。
+ */
+async function authFetch(url: string, options: RequestInit): Promise<Response> {
+    let response = await fetch(url, options);
+
+    if (response.status === 401) {
+        // 避免多個並行請求同時觸發 refresh
+        if (!refreshPromise) {
+            refreshPromise = tryRefreshToken().finally(() => {
+                refreshPromise = null;
+            });
+        }
+
+        const refreshed = await refreshPromise;
+
+        if (refreshed) {
+            // 刷新成功：用新的 access token 重試原始請求
+            const newAccessToken = useUserAuthStore.getState().accessToken;
+            const newHeaders = new Headers(options.headers);
+            if (newAccessToken) {
+                newHeaders.set("Authorization", `Bearer ${newAccessToken}`);
+            }
+            response = await fetch(url, { ...options, headers: newHeaders });
+        }
+    }
+
+    return response;
+}
+
+// ─── 公開 API ────────────────────────────────────────────────────
+
 export async function get<T>(
     path: string,
     params?: Record<string, string>,
@@ -41,7 +117,7 @@ export async function get<T>(
     if (params) {
         Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
     }
-    const response = await fetch(url.toString(), {
+    const response = await authFetch(url.toString(), {
         method: "GET",
         headers: { "Content-Type": "application/json", ...headers },
     });
@@ -54,7 +130,7 @@ export async function post<T>(
     headers?: Record<string, string>,
 ): Promise<T> {
     const url = buildUrl(path);
-    const response = await fetch(url.toString(), {
+    const response = await authFetch(url.toString(), {
         method: "POST",
         headers: { "Content-Type": "application/json", ...headers },
         body: body ? JSON.stringify(body) : undefined,
