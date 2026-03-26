@@ -16,8 +16,8 @@ export interface OAuthAuthorizeResponse {
 // ─── Auth API ────────────────────────────────────────────────────
 
 /** 以 Email + 密碼登入 */
-export function login(email: string, password: string): Promise<TokenResponse> {
-    return post<TokenResponse>("/auth/login", { email, password });
+export function login(identifier: string, password: string): Promise<TokenResponse> {
+    return post<TokenResponse>("/auth/login", { identifier, password });
 }
 
 /** 以 Email + 密碼註冊 */

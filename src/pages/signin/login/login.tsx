@@ -9,7 +9,7 @@ export default function Login() {
     const navigate = useNavigate();
     const setTokens = useUserAuthStore((s) => s.setTokens);
 
-    const [username, setUsername] = useState("");
+    const [identifier, setIdentifier] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -21,7 +21,7 @@ export default function Login() {
         setError(null);
 
         try {
-            const tokens = await login(username, password);
+            const tokens = await login(identifier, password);
             setTokens(tokens.access_token, tokens.refresh_token);
             navigate("/", { replace: true });
         } catch (err) {
@@ -40,9 +40,9 @@ export default function Login() {
             <h1>登入基地</h1>
             <p>歡迎回到備戰基地</p>
             <form onSubmit={handleSubmit}>
-                <label htmlFor="username">電子郵件或使用者名稱</label>
+                <label htmlFor="identifier">電子郵件或使用者名稱</label>
                 <div className={styles.inputContainer}>
-                    <input type="text" placeholder="user@example.com" id="username" value={username} onChange={(e) => setUsername(e.target.value)} />
+                    <input type="text" placeholder="電子郵件或使用者名稱" id="identifier" value={identifier} onChange={(e) => setIdentifier(e.target.value)} />
                     <i className="fa-solid fa-user"></i>
                 </div>
 
