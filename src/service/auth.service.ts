@@ -17,6 +17,15 @@ export interface OAuthAuthorizeResponse {
     state: string;
 }
 
+export interface OAuthFlowErrorDetail {
+    code?: string;
+    message?: string;
+    registration_token?: string;
+    link_token?: string;
+    provider?: string;
+    email?: string;
+}
+
 // ─── Auth API ────────────────────────────────────────────────────
 
 /** 以 Email + 密碼登入 */
@@ -55,6 +64,30 @@ export function handleOAuthCallback(
         code,
         state,
         redirect_uri: redirectUri,
+    });
+}
+
+export function oauthFinalize(
+    registrationToken: string,
+    username: string,
+    termsAccepted: boolean,
+): Promise<TokenResponse> {
+    return post<TokenResponse>("/auth/oauth-finalize", {
+        registration_token: registrationToken,
+        username,
+        terms_accepted: termsAccepted,
+    });
+}
+
+export function linkIdentity(
+    linkToken: string,
+    identifier: string,
+    password: string,
+): Promise<TokenResponse> {
+    return post<TokenResponse>("/auth/link-identity", {
+        link_token: linkToken,
+        identifier,
+        password,
     });
 }
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { handleOAuthCallback } from "../../../service/auth.service";
+import type { OAuthFlowErrorDetail } from "../../../service/auth.service";
 import { useUserAuthStore } from "../../../service/user_auth.service";
 import { ApiError } from "../../../service/api";
 import styles from "./oauth-callback.module.css";
@@ -48,6 +49,23 @@ export default function OAuthCallback() {
             })
             .catch((err) => {
                 if (err instanceof ApiError) {
+                    const detail = err.payload as OAuthFlowErrorDetail | null;
+                    if (err.status === 403 && detail?.code === "REGISTRATION_REQUIRED" && detail.registration_token) {
+                        sessionStorage.setItem("oauth_registration_token", detail.registration_token);
+                        sessionStorage.setItem("oauth_registration_email", detail.email ?? "");
+                        sessionStorage.setItem("oauth_registration_provider", detail.provider ?? savedProvider);
+                        navigate("/signin/complete-profile", { replace: true });
+                        return;
+                    }
+
+                    if (err.status === 403 && detail?.code === "LINK_REQUIRED" && detail.link_token) {
+                        sessionStorage.setItem("oauth_link_token", detail.link_token);
+                        sessionStorage.setItem("oauth_link_email", detail.email ?? "");
+                        sessionStorage.setItem("oauth_link_provider", detail.provider ?? savedProvider);
+                        navigate("/signin/link-identity", { replace: true });
+                        return;
+                    }
+
                     setError(err.detail);
                 } else {
                     setError("登入過程中發生未知錯誤，請稍後再試");

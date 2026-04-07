@@ -10,6 +10,8 @@ import Docs from './pages/introductions/terms_docs/docs';
 
 // OAuth 回呼頁面 (延遲載入)
 const OAuthCallback = lazy(() => import('./pages/signin/oauth-callback/oauth-callback'));
+const CompleteProfile = lazy(() => import('./pages/signin/complete-profile/complete-profile'));
+const LinkIdentity = lazy(() => import('./pages/signin/link-identity/link-identity'));
 
 // 裡網站組件 (延遲載入：只有進到該頁面才會下載程式碼，優化效能)
 // const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
@@ -27,6 +29,8 @@ function App() {
           <Route path="/docs" element={<Docs />} />
           <Route path="/features" element={<Features />} />
           <Route path="/signin" element={<Signin />} />
+          <Route path="/signin/complete-profile" element={<CompleteProfile />} />
+          <Route path="/signin/link-identity" element={<LinkIdentity />} />
           <Route path="/about" element={<About />} />
           <Route path="/auth/callback" element={<OAuthCallback />} />
 

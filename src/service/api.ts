@@ -5,12 +5,14 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
 export class ApiError extends Error {
     status: number;
     detail: string;
+    payload: unknown;
 
-    constructor(status: number, detail: string) {
+    constructor(status: number, detail: string, payload: unknown = null) {
         super(detail);
         this.name = "ApiError";
         this.status = status;
         this.detail = detail;
+        this.payload = payload;
     }
 }
 
@@ -52,8 +54,25 @@ async function tryRefreshToken(): Promise<boolean> {
 
 async function handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
-        const body = await response.json().catch(() => ({ detail: "未知錯誤" }));
-        throw new ApiError(response.status, body.detail ?? "未知錯誤");
+        const body = await response.json().catch(() => ({} as Record<string, unknown>));
+        const detail = body.detail;
+
+        if (typeof detail === "string") {
+            throw new ApiError(response.status, detail, detail);
+        }
+
+        if (detail && typeof detail === "object") {
+            const detailObject = detail as Record<string, unknown>;
+            const message =
+                typeof detailObject.message === "string"
+                    ? detailObject.message
+                    : typeof detailObject.detail === "string"
+                        ? detailObject.detail
+                        : "未知錯誤";
+            throw new ApiError(response.status, message, detailObject);
+        }
+
+        throw new ApiError(response.status, "未知錯誤", body);
     }
     return response.json() as Promise<T>;
 }
