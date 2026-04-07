@@ -29,8 +29,9 @@ export function register(
     email: string,
     password: string,
     username?: string,
+    termsAccepted: boolean = false,
 ): Promise<TokenResponse> {
-    return post<TokenResponse>("/auth/register", { email, password, username });
+    return post<TokenResponse>("/auth/register", { email, password, username, terms_accepted: termsAccepted });
 }
 
 /** 取得 OAuth 授權 URL */
