@@ -61,6 +61,7 @@
 .loginSignInBtns {
     display: flex;
     align-items: center;
+    gap: 0.75rem;
 }
 
 .loginSignInBtns a {
@@ -79,6 +80,64 @@
 .registerBtn {
     background-color: #d41132;
     margin-left: .3rem;
+}
+
+.accountMenu {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.accountButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    padding: 0.65rem 1rem;
+    cursor: pointer;
+}
+
+.accountGreeting {
+    max-width: 13rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.accountCaret {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.accountDropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    min-width: 10rem;
+    border-radius: 12px;
+    background: #241216;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+    padding: 0.5rem;
+    z-index: 10;
+}
+
+.logoutButton {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: #fff;
+    text-align: left;
+    border-radius: 8px;
+    padding: 0.65rem 0.8rem;
+    cursor: pointer;
+}
+
+.logoutButton:hover {
+    background: rgba(212, 17, 50, 0.18);
 }
 
 .burger {
@@ -181,6 +240,21 @@
     .loginSignInBtns a {
         margin-right: 0;
         padding: 0.7rem 1rem;
+    }
+
+    .accountMenu {
+        width: 100%;
+    }
+
+    .accountButton {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .accountDropdown {
+        position: static;
+        width: 100%;
+        margin-top: 0.5rem;
     }
 
     .burger {

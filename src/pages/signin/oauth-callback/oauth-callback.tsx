@@ -43,7 +43,7 @@ export default function OAuthCallback() {
         // 向後端交換 tokens
         handleOAuthCallback(savedProvider, code, stateFromUrl, savedRedirectUri)
             .then((tokens) => {
-                setAccessToken(tokens.access_token);
+                setAccessToken(tokens.access_token, tokens.user.username);
                 navigate("/", { replace: true });
             })
             .catch((err) => {

@@ -40,7 +40,7 @@ async function tryRefreshToken(): Promise<boolean> {
         }
 
         const data = await response.json();
-    setAccessToken(data.access_token);
+        setAccessToken(data.access_token, data.user?.username ?? null);
         return true;
     } catch {
         clearAuth();

@@ -34,7 +34,7 @@ export default function Register() {
         setLoading(true);
         try {
             const tokens = await register(email, password, userId || undefined);
-            setAccessToken(tokens.access_token);
+            setAccessToken(tokens.access_token, tokens.user.username);
             navigate("/", { replace: true });
         } catch (err) {
             if (err instanceof ApiError) {

@@ -22,7 +22,7 @@ export default function Login() {
 
         try {
             const tokens = await login(identifier, password);
-            setAccessToken(tokens.access_token);
+            setAccessToken(tokens.access_token, tokens.user.username);
             navigate("/", { replace: true });
         } catch (err) {
             if (err instanceof ApiError) {
