@@ -24,19 +24,14 @@ let refreshPromise: Promise<boolean> | null = null;
  * 回傳 true 表示刷新成功，false 表示失敗（需登出）。
  */
 async function tryRefreshToken(): Promise<boolean> {
-    const { refreshToken, setTokens, clearAuth } = useUserAuthStore.getState();
-
-    if (!refreshToken) {
-        clearAuth();
-        return false;
-    }
+    const { setAccessToken, clearAuth } = useUserAuthStore.getState();
 
     try {
         const url = buildUrl("/auth/refresh");
         const response = await fetch(url.toString(), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ refresh_token: refreshToken }),
+            credentials: "include",
         });
 
         if (!response.ok) {
@@ -45,7 +40,7 @@ async function tryRefreshToken(): Promise<boolean> {
         }
 
         const data = await response.json();
-        setTokens(data.access_token, data.refresh_token);
+    setAccessToken(data.access_token);
         return true;
     } catch {
         clearAuth();
@@ -80,7 +75,7 @@ function buildUrl(path: string): URL {
  * 當收到 401 時自動嘗試 refresh token，成功後以新 token 重試原請求。
  */
 async function authFetch(url: string, options: RequestInit): Promise<Response> {
-    let response = await fetch(url, options);
+    let response = await fetch(url, { ...options, credentials: "include" });
 
     if (response.status === 401) {
         // 避免多個並行請求同時觸發 refresh
@@ -99,7 +94,11 @@ async function authFetch(url: string, options: RequestInit): Promise<Response> {
             if (newAccessToken) {
                 newHeaders.set("Authorization", `Bearer ${newAccessToken}`);
             }
-            response = await fetch(url, { ...options, headers: newHeaders });
+            response = await fetch(url, {
+                ...options,
+                headers: newHeaders,
+                credentials: "include",
+            });
         }
     }
 

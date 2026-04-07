@@ -4,8 +4,12 @@ import { get, post } from "./api";
 
 export interface TokenResponse {
     access_token: string;
-    refresh_token: string;
     token_type: string;
+    user: {
+        id: string;
+        username: string | null;
+        email: string | null;
+    };
 }
 
 export interface OAuthAuthorizeResponse {
@@ -54,10 +58,8 @@ export function handleOAuthCallback(
 }
 
 /** 以 Refresh Token 換發新 tokens */
-export function refreshToken(
-    refresh_token: string,
-): Promise<TokenResponse> {
-    return post<TokenResponse>("/auth/refresh", { refresh_token });
+export function refreshToken(): Promise<TokenResponse> {
+    return post<TokenResponse>("/auth/refresh");
 }
 
 /** 登出（撤銷所有 tokens） */

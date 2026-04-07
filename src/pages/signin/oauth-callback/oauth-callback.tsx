@@ -8,7 +8,7 @@ import styles from "./oauth-callback.module.css";
 export default function OAuthCallback() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    const setTokens = useUserAuthStore((s) => s.setTokens);
+    const setAccessToken = useUserAuthStore((s) => s.setAccessToken);
 
     const [error, setError] = useState<string | null>(null);
 
@@ -43,7 +43,7 @@ export default function OAuthCallback() {
         // 向後端交換 tokens
         handleOAuthCallback(savedProvider, code, stateFromUrl, savedRedirectUri)
             .then((tokens) => {
-                setTokens(tokens.access_token, tokens.refresh_token);
+                setAccessToken(tokens.access_token);
                 navigate("/", { replace: true });
             })
             .catch((err) => {

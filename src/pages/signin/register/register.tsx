@@ -7,7 +7,7 @@ import { ApiError } from "../../../service/api";
 
 export default function Register() {
     const navigate = useNavigate();
-    const setTokens = useUserAuthStore((s) => s.setTokens);
+    const setAccessToken = useUserAuthStore((s) => s.setAccessToken);
 
     const [email, setEmail] = useState("");
     const [userId, setUserId] = useState("");
@@ -34,7 +34,7 @@ export default function Register() {
         setLoading(true);
         try {
             const tokens = await register(email, password, userId || undefined);
-            setTokens(tokens.access_token, tokens.refresh_token);
+            setAccessToken(tokens.access_token);
             navigate("/", { replace: true });
         } catch (err) {
             if (err instanceof ApiError) {

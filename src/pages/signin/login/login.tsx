@@ -7,7 +7,7 @@ import { ApiError } from "../../../service/api";
 
 export default function Login() {
     const navigate = useNavigate();
-    const setTokens = useUserAuthStore((s) => s.setTokens);
+    const setAccessToken = useUserAuthStore((s) => s.setAccessToken);
 
     const [identifier, setIdentifier] = useState("");
     const [password, setPassword] = useState("");
@@ -22,7 +22,7 @@ export default function Login() {
 
         try {
             const tokens = await login(identifier, password);
-            setTokens(tokens.access_token, tokens.refresh_token);
+            setAccessToken(tokens.access_token);
             navigate("/", { replace: true });
         } catch (err) {
             if (err instanceof ApiError) {
