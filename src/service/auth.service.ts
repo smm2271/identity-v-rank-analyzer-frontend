@@ -96,9 +96,9 @@ export function refreshToken(): Promise<TokenResponse> {
     return post<TokenResponse>("/auth/refresh");
 }
 
-/** 登出（撤銷所有 tokens） */
-export function logout(accessToken: string): Promise<{ message: string }> {
-    return post<{ message: string }>("/auth/logout", undefined, {
+/** 登出（撤銷當前 session） */
+export function logout(accessToken: string): Promise<void> {
+    return post<void>("/auth/logout", undefined, {
         Authorization: `Bearer ${accessToken}`,
     });
 }

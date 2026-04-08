@@ -74,6 +74,11 @@ async function handleResponse<T>(response: Response): Promise<T> {
 
         throw new ApiError(response.status, "未知錯誤", body);
     }
+
+    if (response.status === 204) {
+        return undefined as T;
+    }
+
     return response.json() as Promise<T>;
 }
 
