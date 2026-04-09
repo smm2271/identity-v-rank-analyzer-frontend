@@ -24,6 +24,7 @@ export interface OAuthFlowErrorDetail {
     link_token?: string;
     provider?: string;
     email?: string;
+    verification_oauth_providers?: string[];
 }
 
 // ─── Auth API ────────────────────────────────────────────────────
@@ -59,12 +60,19 @@ export function handleOAuthCallback(
     code: string,
     state: string,
     redirectUri: string,
+    linkToken?: string,
 ): Promise<TokenResponse> {
-    return get<TokenResponse>(`/auth/${provider}/callback`, {
+    const query: Record<string, string> = {
         code,
         state,
         redirect_uri: redirectUri,
-    });
+    };
+
+    if (linkToken) {
+        query.link_token = linkToken;
+    }
+
+    return get<TokenResponse>(`/auth/${provider}/callback`, query);
 }
 
 export function oauthFinalize(

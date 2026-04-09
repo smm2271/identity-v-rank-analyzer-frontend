@@ -16,6 +16,8 @@ export default function OAuthCallback() {
     useEffect(() => {
         const code = searchParams.get("code");
         const stateFromUrl = searchParams.get("state");
+        const linkVerificationMode = sessionStorage.getItem("oauth_link_verification_mode") === "1";
+        const pendingLinkToken = sessionStorage.getItem("oauth_link_token");
 
         // 從 sessionStorage 取回先前存的 OAuth 資訊
         const savedState = sessionStorage.getItem("oauth_state");
@@ -26,6 +28,7 @@ export default function OAuthCallback() {
         sessionStorage.removeItem("oauth_state");
         sessionStorage.removeItem("oauth_provider");
         sessionStorage.removeItem("oauth_redirect_uri");
+        sessionStorage.removeItem("oauth_link_verification_mode");
 
         // 基本驗證
         if (!code || !stateFromUrl) {
@@ -42,8 +45,18 @@ export default function OAuthCallback() {
         }
 
         // 向後端交換 tokens
-        handleOAuthCallback(savedProvider, code, stateFromUrl, savedRedirectUri)
+        handleOAuthCallback(
+            savedProvider,
+            code,
+            stateFromUrl,
+            savedRedirectUri,
+            linkVerificationMode ? (pendingLinkToken ?? undefined) : undefined,
+        )
             .then((tokens) => {
+                sessionStorage.removeItem("oauth_link_token");
+                sessionStorage.removeItem("oauth_link_email");
+                sessionStorage.removeItem("oauth_link_provider");
+                sessionStorage.removeItem("oauth_link_verification_providers");
                 setAccessToken(tokens.access_token, tokens.user.username);
                 navigate("/app/dashboard", { replace: true });
             })
@@ -62,6 +75,10 @@ export default function OAuthCallback() {
                         sessionStorage.setItem("oauth_link_token", detail.link_token);
                         sessionStorage.setItem("oauth_link_email", detail.email ?? "");
                         sessionStorage.setItem("oauth_link_provider", detail.provider ?? savedProvider);
+                        sessionStorage.setItem(
+                            "oauth_link_verification_providers",
+                            JSON.stringify(detail.verification_oauth_providers ?? []),
+                        );
                         navigate("/signin/link-identity", { replace: true });
                         return;
                     }
