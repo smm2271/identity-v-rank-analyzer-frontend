@@ -26,14 +26,20 @@ export default function DashboardShell() {
         <div className={styles.shell}>
             <aside className={styles.sidebar}>
                 <div className={styles.brand}>
-                    <span className={styles.brandBadge}>IV</span>
+                    <span className={styles.brandBadge}>IDV</span>
                     <div>
-                        <p className={styles.brandTitle}>Hunter Console</p>
-                        <p className={styles.brandHint}>Week 9 / 內站</p>
+                        <p className={styles.brandTitle}>對戰紀錄中心</p>
+                        <p className={styles.brandHint}>戰鬥基地</p>
                     </div>
                 </div>
 
                 <nav className={styles.nav}>
+                    <NavLink
+                        to="/app/dashboard"
+                        className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
+                    >
+                        總儀表板
+                    </NavLink>
                     <NavLink
                         to="/app/history"
                         className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navItemActive : ""}`}

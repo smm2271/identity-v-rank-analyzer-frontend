@@ -41,7 +41,8 @@ function App() {
           {/* --- 受保護路由 (裡網站) --- */}
           <Route element={<ProtectedRoute />}>
             <Route path="/app" element={<DashboardShell />}>
-              <Route index element={<Navigate to="history" replace />} />
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<DashboardOverviewPage />} />
               <Route path="history" element={<MatchHistoryPage />} />
             </Route>
           </Route>
