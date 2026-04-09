@@ -43,7 +43,7 @@ export default function CompleteProfile() {
             sessionStorage.removeItem("oauth_registration_email");
             sessionStorage.removeItem("oauth_registration_provider");
             setAccessToken(tokens.access_token, tokens.user.username);
-            navigate("/app/history", { replace: true });
+            navigate("/app/dashboard", { replace: true });
         } catch (err) {
             if (err instanceof ApiError) {
                 setError(err.detail);

@@ -35,7 +35,7 @@ export default function Register() {
         try {
             const tokens = await register(email, password, userId || undefined, tosChecked);
             setAccessToken(tokens.access_token, tokens.user.username);
-            navigate("/app/history", { replace: true });
+            navigate("/app/dashboard", { replace: true });
         } catch (err) {
             if (err instanceof ApiError) {
                 setError(err.detail);

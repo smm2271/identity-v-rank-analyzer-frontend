@@ -39,7 +39,7 @@ export default function LinkIdentity() {
             sessionStorage.removeItem("oauth_link_email");
             sessionStorage.removeItem("oauth_link_provider");
             setAccessToken(tokens.access_token, tokens.user.username);
-            navigate("/app/history", { replace: true });
+            navigate("/app/dashboard", { replace: true });
         } catch (err) {
             if (err instanceof ApiError) {
                 setError(err.detail);

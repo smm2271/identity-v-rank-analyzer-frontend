@@ -14,6 +14,7 @@ const OAuthCallback = lazy(() => import('./pages/signin/oauth-callback/oauth-cal
 const CompleteProfile = lazy(() => import('./pages/signin/complete-profile/complete-profile'));
 const LinkIdentity = lazy(() => import('./pages/signin/link-identity/link-identity'));
 const DashboardShell = lazy(() => import('./pages/app-shell/dashboard-shell'));
+const DashboardOverviewPage = lazy(() => import('./pages/app-shell/dashboard-overview/dashboard-overview'));
 const MatchHistoryPage = lazy(() => import('./pages/app-shell/match-history/match-history'));
 
 // 裡網站組件 (延遲載入：只有進到該頁面才會下載程式碼，優化效能)

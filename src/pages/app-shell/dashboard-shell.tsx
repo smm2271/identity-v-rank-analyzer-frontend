@@ -40,7 +40,6 @@ export default function DashboardShell() {
                     >
                         歷史戰績
                     </NavLink>
-                    <span className={`${styles.navItem} ${styles.navItemMuted}`}>儀表板總覽（規劃中）</span>
                     <span className={`${styles.navItem} ${styles.navItemMuted}`}>分析中心（規劃中）</span>
                 </nav>
 

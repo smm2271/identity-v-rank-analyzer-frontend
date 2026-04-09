@@ -45,7 +45,7 @@ export default function OAuthCallback() {
         handleOAuthCallback(savedProvider, code, stateFromUrl, savedRedirectUri)
             .then((tokens) => {
                 setAccessToken(tokens.access_token, tokens.user.username);
-                navigate("/app/history", { replace: true });
+                navigate("/app/dashboard", { replace: true });
             })
             .catch((err) => {
                 if (err instanceof ApiError) {
