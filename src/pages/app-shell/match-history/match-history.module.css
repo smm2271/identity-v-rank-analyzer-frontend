@@ -1,0 +1,136 @@
+.panel {
+    border: 1px solid #e3d6c3;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.88);
+    padding: 20px;
+    box-shadow: 0 16px 28px rgba(17, 19, 23, 0.07);
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.toolbar h2 {
+    margin: 0;
+    font-size: clamp(22px, 4vw, 28px);
+    font-weight: 900;
+}
+
+.toolbar p {
+    margin: 6px 0 0;
+    color: #64707d;
+}
+
+.limitSelector {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #4d5966;
+    font-weight: 700;
+}
+
+.limitSelector select {
+    border: 1px solid #d8c8b3;
+    border-radius: 10px;
+    background: #fffdf9;
+    padding: 8px 10px;
+    font-weight: 700;
+}
+
+.stateBox {
+    border-radius: 14px;
+    padding: 22px;
+    background: linear-gradient(120deg, #f8f0e3, #fffbf2);
+    color: #495565;
+}
+
+.stateError {
+    background: linear-gradient(120deg, #ffe3de, #fff3ef);
+    color: #a12f2f;
+}
+
+.tableWrap {
+    overflow-x: auto;
+    border: 1px solid #e6d8c5;
+    border-radius: 14px;
+}
+
+.table {
+    width: 100%;
+    min-width: 820px;
+    border-collapse: collapse;
+}
+
+.table thead {
+    background: linear-gradient(120deg, #ffefd8, #fce8d8);
+}
+
+.table th,
+.table td {
+    text-align: left;
+    padding: 12px 14px;
+    border-bottom: 1px solid #efe3d2;
+    font-size: 14px;
+}
+
+.table tbody tr {
+    transition: background-color 180ms ease;
+}
+
+.table tbody tr:hover {
+    background: #fff9ef;
+}
+
+.uuid {
+    font-family: "Space Grotesk", "Noto Sans TC", sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    color: #51606f;
+}
+
+.pagination {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.pagination button {
+    border: none;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-weight: 700;
+    background: #e8dac7;
+    color: #25303d;
+    cursor: pointer;
+}
+
+.pagination button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.pagination span {
+    color: #576474;
+    font-weight: 700;
+}
+
+@media (max-width: 720px) {
+    .panel {
+        padding: 14px;
+    }
+
+    .toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .pagination {
+        justify-content: space-between;
+    }
+}
