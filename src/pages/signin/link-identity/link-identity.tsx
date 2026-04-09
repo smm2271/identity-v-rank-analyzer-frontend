@@ -1,15 +1,20 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useMemo, useState, type FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import SigninNav from "../../../share/signin-nav/signin-nav";
-import { getOAuthAuthorizeUrl } from "../../../service/auth.service";
+import { getOAuthAuthorizeUrl, linkIdentity } from "../../../service/auth.service";
 import { ApiError } from "../../../service/api";
+import { useUserAuthStore } from "../../../service/user_auth.service";
 import styles from "../oauth-flow/oauth-flow.module.css";
 
 const OAUTH_CALLBACK_PATH = "/auth/callback";
 
 export default function LinkIdentity() {
+    const navigate = useNavigate();
+    const setAccessToken = useUserAuthStore((s) => s.setAccessToken);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [identifier, setIdentifier] = useState(() => sessionStorage.getItem("oauth_link_email") ?? "");
+    const [password, setPassword] = useState("");
 
     const linkToken = sessionStorage.getItem("oauth_link_token");
     const oauthEmail = sessionStorage.getItem("oauth_link_email");
@@ -30,6 +35,43 @@ export default function LinkIdentity() {
             return [] as string[];
         }
     }, []);
+
+    async function handlePasswordLink(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        setError(null);
+
+        if (!linkToken) {
+            setError("找不到 OAuth 關聯資訊，請重新登入");
+            return;
+        }
+        if (!identifier.trim()) {
+            setError("請輸入原帳號 Email 或使用者名稱");
+            return;
+        }
+        if (!password) {
+            setError("請輸入原帳號密碼");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const tokens = await linkIdentity(linkToken, identifier.trim(), password);
+            sessionStorage.removeItem("oauth_link_token");
+            sessionStorage.removeItem("oauth_link_email");
+            sessionStorage.removeItem("oauth_link_provider");
+            sessionStorage.removeItem("oauth_link_verification_providers");
+            setAccessToken(tokens.access_token, tokens.user.username);
+            navigate("/app/dashboard", { replace: true });
+        } catch (err) {
+            if (err instanceof ApiError) {
+                setError(err.detail);
+            } else {
+                setError("無法完成帳號關聯，請稍後再試");
+            }
+        } finally {
+            setLoading(false);
+        }
+    }
 
     async function handleProviderVerify(provider: string) {
         setError(null);
@@ -70,7 +112,7 @@ export default function LinkIdentity() {
             <div className={styles.flowShell}>
                 <div className={styles.flowCard}>
                     <h1 className={styles.flowTitle}>關聯帳號</h1>
-                    <p className={styles.flowSubtitle}>請使用原本已綁定的第三方帳號登入，完成身分驗證後才會關聯目前 OAuth 身分。</p>
+                    <p className={styles.flowSubtitle}>請先驗證原本的帳號身分，完成後才會關聯目前 OAuth 身分。你可以使用既有第三方帳號，或直接輸入原帳號密碼。</p>
                     {oauthEmail && <p className={styles.flowMeta}>OAuth Email: {oauthEmail}</p>}
                     {oauthProvider && <p className={styles.flowMeta}>登入供應商: {oauthProvider}</p>}
                     <div className={styles.flowForm}>
@@ -91,9 +133,36 @@ export default function LinkIdentity() {
                                     ))}
                                 </div>
                             </>
-                        ) : (
-                            <p className={styles.flowError}>找不到可用的第三方驗證方式，請聯絡管理員協助。</p>
-                        )}
+                        ) : null}
+
+                        <form className={styles.flowForm} onSubmit={handlePasswordLink}>
+                            <p className={styles.flowMeta}>或使用原帳號密碼驗證</p>
+                            <div className={styles.flowField}>
+                                <label htmlFor="link-identifier">Email / 使用者名稱</label>
+                                <input
+                                    id="link-identifier"
+                                    type="text"
+                                    value={identifier}
+                                    onChange={(event) => setIdentifier(event.target.value)}
+                                    autoComplete="username"
+                                    placeholder="輸入原帳號 Email 或使用者名稱"
+                                />
+                            </div>
+                            <div className={styles.flowField}>
+                                <label htmlFor="link-password">密碼</label>
+                                <input
+                                    id="link-password"
+                                    type="password"
+                                    value={password}
+                                    onChange={(event) => setPassword(event.target.value)}
+                                    autoComplete="current-password"
+                                    placeholder="輸入原帳號密碼"
+                                />
+                            </div>
+                            <button type="submit" className={styles.flowButton} disabled={loading}>
+                                {loading ? "處理中…" : "以密碼驗證並關聯"}
+                            </button>
+                        </form>
 
                         {error && <p className={styles.flowError}>{error}</p>}
 
