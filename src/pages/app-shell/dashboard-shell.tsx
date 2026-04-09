@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { logout } from "../../service/auth.service";
 import { useUserAuthStore } from "../../service/user_auth.service";
@@ -8,6 +9,7 @@ export default function DashboardShell() {
     const username = useUserAuthStore((state) => state.username);
     const accessToken = useUserAuthStore((state) => state.accessToken);
     const clearAuth = useUserAuthStore((state) => state.clearAuth);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     async function handleLogout() {
         try {
@@ -22,9 +24,14 @@ export default function DashboardShell() {
         }
     }
 
+    function closeSidebarOnNavigate() {
+        setSidebarOpen(false);
+    }
+
     return (
-        <div className={styles.shell}>
-            <aside className={styles.sidebar}>
+        <div className={`${styles.shell} ${sidebarOpen ? styles.shellOpen : ""}`}>
+            {sidebarOpen && <div className={styles.backdrop} onClick={() => setSidebarOpen(false)} />}
+            <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ""}`}>
                 <div className={styles.brand}>
                     <span className={styles.brandBadge}>IDV</span>
                     <div>
@@ -36,12 +43,14 @@ export default function DashboardShell() {
                 <nav className={styles.nav}>
                     <NavLink
                         to="/app/dashboard"
+                        onClick={closeSidebarOnNavigate}
                         className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
                     >
                         總儀表板
                     </NavLink>
                     <NavLink
                         to="/app/history"
+                        onClick={closeSidebarOnNavigate}
                         className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
                     >
                         歷史戰績
@@ -60,6 +69,16 @@ export default function DashboardShell() {
 
             <main className={styles.main}>
                 <header className={styles.topbar}>
+                    <button
+                        type="button"
+                        className={styles.hamburger}
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                        aria-label="Toggle sidebar"
+                    >
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
                     <h1>對戰紀錄中心</h1>
                     <p>整合你的每一場對局，建立可追蹤的進步曲線。</p>
                 </header>
