@@ -118,6 +118,13 @@ function calculateResults(items: MatchItem[], role: number) {
     return { win, tie, loss, total: win + tie + loss };
 }
 
+function getRoleMatchesWithKillNum(items: MatchItem[], role: number): MatchItem[] {
+    return items.filter((item) => {
+        if (item.utype !== role) return false;
+        if (item.match_type === 3 || item.match_type === 10) return false;
+        return item.kill_num !== null;
+    });
+}
 
 function buildLineChartPath(points: Array<{ x: number; y: number }>): string {
     if (points.length === 0) return "";
@@ -284,11 +291,27 @@ export default function DashboardOverviewPage() {
     const hunterResults = useMemo(() => calculateResults(recentMatches, 1), [recentMatches]);
     const survivorResults = useMemo(() => calculateResults(recentMatches, 2), [recentMatches]);
 
-    const averageKills = useMemo(() => {
-        const killValues = recentMatches.flatMap((item) => (item.kill_num === null ? [] : [item.kill_num]));
-        if (killValues.length === 0) return null;
-        const sum = killValues.reduce((total, value) => total + value, 0);
-        return sum / killValues.length;
+    const hunterAverageKills = useMemo(() => {
+        const hunterMatches = getRoleMatchesWithKillNum(recentMatches, 1);
+        if (hunterMatches.length === 0) return null;
+
+        const sum = hunterMatches.reduce((total, item) => total + (item.kill_num ?? 0), 0);
+        return sum / hunterMatches.length;
+    }, [recentMatches]);
+
+    const survivorEscapeRate = useMemo(() => {
+        const survivorMatches = getRoleMatchesWithKillNum(recentMatches, 2);
+        if (survivorMatches.length === 0) return null;
+
+        const escapedCount = survivorMatches.reduce((total, item) => {
+            const kills = item.kill_num ?? 0;
+            const escapedInMatch = Math.max(0, Math.min(4, 4 - kills));
+            return total + escapedInMatch;
+        }, 0);
+
+        const totalSlots = survivorMatches.length * 4;
+        if (totalSlots === 0) return null;
+        return (escapedCount / totalSlots) * 100;
     }, [recentMatches]);
 
     const latestScoresSorted = useMemo(
@@ -337,13 +360,6 @@ export default function DashboardOverviewPage() {
     );
 
     const latestScoreMax = latestScoresSorted.length > 0 ? Math.max(...latestScoresSorted.map((item) => item.score)) : 0;
-    const latestUpdatedAt = useMemo(() => {
-        const allTimestamps = [...recentMatches.map((item) => item.created_at), ...latestScores.map((item) => item.recorded_at)]
-            .filter((value): value is string => Boolean(value));
-
-        if (allTimestamps.length === 0) return null;
-        return allTimestamps.sort((left, right) => right.localeCompare(left))[0] ?? null;
-    }, [latestScores, recentMatches]);
 
     const selectedScoreTrend = useMemo(() => {
         if (selectedHistory.length < 2) return null;
@@ -357,26 +373,6 @@ export default function DashboardOverviewPage() {
 
     return (
         <div className={styles.page}>
-            <section className={styles.heroCard}>
-                <div className={styles.heroCopy}>
-                    <p className={styles.kicker}>總儀表板</p>
-                    <h2>一手掌握你的對局與認知分走勢</h2>
-                    <p className={styles.heroDescription}>
-                        資料直接來自後端 API，顯示最近 100 場對戰、最新認知分，以及選定角色的歷史曲線。
-                    </p>
-                </div>
-
-                <div className={styles.heroStats}>
-                    <div>
-                        <span>資料來源</span>
-                        <strong>Matches + Ladder Scores</strong>
-                    </div>
-                    <div>
-                        <span>最近更新</span>
-                        <strong>{formatDateTime(latestUpdatedAt)}</strong>
-                    </div>
-                </div>
-            </section>
 
             {(matchError || scoreError || historyError) && (
                 <section className={styles.noticeStack}>
@@ -390,19 +386,21 @@ export default function DashboardOverviewPage() {
                 <article className={styles.metricCard}>
                     <p className={styles.label}>總場次</p>
                     <p className={styles.value}>{pageLoading && matches === null ? "載入中..." : totalMatches.toLocaleString("zh-TW")}</p>
-                    <p className={styles.hint}>已向 /api/v1/matches 請求分頁資訊</p>
                 </article>
 
                 <article className={styles.metricCard}>
-                    <p className={styles.label}>最近載入筆數</p>
+                    <p className={styles.label}>已上傳資料數</p>
                     <p className={styles.value}>{pageLoading && matches === null ? "--" : loadedMatchCount.toLocaleString("zh-TW")}</p>
-                    <p className={styles.hint}>用於模式分布與平均擊殺分析</p>
                 </article>
 
                 <article className={styles.metricCard}>
-                    <p className={styles.label}>平均擊殺</p>
-                    <p className={styles.value}>{averageKills === null ? "--" : averageKills.toFixed(1)}</p>
-                    <p className={styles.hint}>依最近 100 場有效擊殺資料計算</p>
+                    <p className={styles.label}>監管平均淘汰數</p>
+                    <p className={styles.value}>{hunterAverageKills === null ? "--" : hunterAverageKills.toFixed(1)}</p>
+                </article>
+
+                <article className={styles.metricCard}>
+                    <p className={styles.label}>求生逃脫率</p>
+                    <p className={styles.value}>{survivorEscapeRate === null ? "--" : `${survivorEscapeRate.toFixed(1)}%`}</p>
                 </article>
 
                 <article className={styles.metricCard}>
