@@ -160,3 +160,15 @@ export async function post<T>(
     });
     return handleResponse<T>(response);
 }
+
+export async function del<T>(
+    path: string,
+    headers?: Record<string, string>,
+): Promise<T> {
+    const url = buildUrl(path);
+    const response = await authFetch(url.toString(), {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json", ...headers },
+    });
+    return handleResponse<T>(response);
+}

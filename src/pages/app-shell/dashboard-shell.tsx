@@ -55,6 +55,13 @@ export default function DashboardShell() {
                     >
                         歷史戰績
                     </NavLink>
+                    <NavLink
+                        to="/app/api-keys"
+                        onClick={closeSidebarOnNavigate}
+                        className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
+                    >
+                        API Keys
+                    </NavLink>
                     <span className={`${styles.navItem} ${styles.navItemMuted}`}>分析中心（規劃中）</span>
                 </nav>
 
