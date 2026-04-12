@@ -16,6 +16,14 @@ export interface MatchItem {
     created_at: string;
 }
 
+export interface LadderScoreItem {
+    id: string;
+    user_id: string;
+    pid: number;
+    score: number;
+    recorded_at: string;
+}
+
 export interface MatchListResponse {
     total: number;
     offset: number;
@@ -23,16 +31,41 @@ export interface MatchListResponse {
     items: MatchItem[];
 }
 
-export async function getMyMatches(offset: number, limit: number): Promise<MatchListResponse> {
-    const accessToken = useUserAuthStore.getState().accessToken;
-    const headers = accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined;
+export interface LatestLadderScoresResponse {
+    latest_scores: Record<string, LadderScoreItem>;
+}
 
+export interface LadderScoresListResponse {
+    pid: number;
+    scores: LadderScoreItem[];
+}
+
+function getAuthHeaders(): Record<string, string> | undefined {
+    const accessToken = useUserAuthStore.getState().accessToken;
+    return accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined;
+}
+
+export async function getMyMatches(offset: number, limit: number): Promise<MatchListResponse> {
     return get<MatchListResponse>(
         "/v1/matches",
         {
             offset: String(offset),
             limit: String(limit),
         },
-        headers,
+        getAuthHeaders(),
+    );
+}
+
+export async function getLatestLadderScores(): Promise<LatestLadderScoresResponse> {
+    return get<LatestLadderScoresResponse>("/v1/matches/ladder-scores/latest", undefined, getAuthHeaders());
+}
+
+export async function getLadderScoreHistory(pid: number, limit = 60): Promise<LadderScoresListResponse> {
+    return get<LadderScoresListResponse>(
+        `/v1/matches/ladder-scores/${pid}`,
+        {
+            limit: String(limit),
+        },
+        getAuthHeaders(),
     );
 }
