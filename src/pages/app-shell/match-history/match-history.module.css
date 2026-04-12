@@ -344,17 +344,135 @@
     font-weight: 700;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 960px) {
     .panel {
         padding: 14px;
+        height: calc(100vh - 120px);
+        border-radius: 14px;
     }
 
     .toolbar {
         flex-direction: column;
         align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .toolbar h2 {
+        font-size: 20px;
+    }
+
+    .toolbar p {
+        font-size: 13px;
+    }
+
+    .table {
+        min-width: 0;
+    }
+
+    .table th,
+    .table td {
+        padding: 10px 8px;
+        font-size: 13px;
+    }
+
+    /* Hide less-important columns on mobile */
+    .table th:nth-child(6),
+    .table td:nth-child(6),
+    .table th:nth-child(7),
+    .table td:nth-child(7) {
+        display: none;
+    }
+
+    .expandedContent {
+        padding: 14px;
+    }
+
+    .expandedContent h4 {
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+
+    .expandedGrid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .expandedGrid span {
+        font-size: 11px;
+    }
+
+    .expandedGrid strong {
+        font-size: 13px;
+    }
+
+    .playersGrid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .playerCard {
+        padding: 8px 12px;
     }
 
     .pagination {
         justify-content: space-between;
+        gap: 6px;
+    }
+
+    .pagination button {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+
+    .cipherSection h5 {
+        font-size: 13px;
+    }
+
+    .cipherKey {
+        font-size: 12px;
+    }
+
+    .cipherVal {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .panel {
+        padding: 10px;
+        height: calc(100vh - 100px);
+        border-radius: 10px;
+    }
+
+    .table th,
+    .table td {
+        padding: 8px 6px;
+        font-size: 12px;
+    }
+
+    /* Hide even more columns on very small screens */
+    .table th:nth-child(5),
+    .table td:nth-child(5) {
+        display: none;
+    }
+
+    .expandedGrid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .playersSection {
+        margin-top: 16px;
+        padding-top: 14px;
+    }
+
+    .expandedContent {
+        padding: 10px;
+    }
+
+    .pagination span {
+        font-size: 12px;
     }
 }
