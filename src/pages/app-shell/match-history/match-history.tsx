@@ -208,6 +208,13 @@ export default function MatchHistoryPage() {
                                         className={`${styles.tableRow} ${expandedIds.has(match.id) ? styles.tableRowActive : ""}`} 
                                         onClick={() => toggleExpand(match.id)}
                                         style={{ cursor: "pointer" }}
+                                        ref={(el) => {
+                                            if (el && expandedIds.has(match.id)) {
+                                                requestAnimationFrame(() => {
+                                                    el.scrollIntoView({ behavior: "smooth", block: "start" });
+                                                });
+                                            }
+                                        }}
                                     >
                                         <td>{formatDateTime(match.game_save_time ?? match.created_at)}</td>
                                         <td>{formatMatchType(match.match_type)}</td>
