@@ -140,6 +140,25 @@
     background: rgba(212, 17, 50, 0.18);
 }
 
+.enterAppButton {
+    display: block;
+    width: 100%;
+    border-radius: 8px;
+    padding: 0.65rem 0.8rem;
+    margin-bottom: 0.25rem;
+    color: #28e2c0;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    background: rgba(40, 226, 192, 0.08);
+    border: 1px solid rgba(40, 226, 192, 0.2);
+    transition: background 0.2s ease;
+}
+
+.enterAppButton:hover {
+    background: rgba(40, 226, 192, 0.18);
+}
+
 .burger {
     display: none;
     width: 2.5rem;

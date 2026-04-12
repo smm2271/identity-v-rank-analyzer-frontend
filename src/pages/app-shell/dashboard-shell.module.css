@@ -124,6 +124,25 @@
     cursor: pointer;
 }
 
+.homeLink {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 9px 12px;
+    margin-bottom: 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(40, 226, 192, 0.25);
+    color: #28e2c0;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+    transition: background 0.2s ease;
+}
+
+.homeLink:hover {
+    background: rgba(40, 226, 192, 0.1);
+}
+
 .main {
     padding: 28px;
     display: flex;

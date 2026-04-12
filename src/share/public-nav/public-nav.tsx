@@ -68,6 +68,9 @@ export default function PublicNav() {
               </button>
               {accountMenuOpen && (
                 <div className={styles.accountDropdown}>
+                  <Link to="/app/dashboard" className={styles.enterAppButton} onClick={() => setAccountMenuOpen(false)}>
+                    進入基地
+                  </Link>
                   <button type="button" className={styles.logoutButton} onClick={handleLogout}>
                     登出
                   </button>

@@ -68,6 +68,7 @@ export default function DashboardShell() {
                 <div className={styles.sidebarBottom}>
                     <p className={styles.userLabel}>登入身分</p>
                     <p className={styles.username}>{username ?? "未命名使用者"}</p>
+                    <a href="/" className={styles.homeLink}>← 回到首頁</a>
                     <button type="button" className={styles.signOut} onClick={handleLogout}>
                         登出
                     </button>
