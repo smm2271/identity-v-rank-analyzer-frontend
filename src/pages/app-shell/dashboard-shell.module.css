@@ -132,15 +132,7 @@
 }
 
 .topbar {
-    padding: 20px 22px;
-    border-radius: 20px;
-    background: linear-gradient(140deg, rgba(21, 26, 34, 0.95), rgba(12, 15, 20, 0.95));
-    border: 1px solid var(--line-700);
-    animation: rise-in 400ms ease-out both;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
+    display: none;
 }
 
 .topbar h1 {
