@@ -141,7 +141,7 @@
 
 .chartGrid {
     display: grid;
-    grid-template-columns: 1.1fr 1.2fr 0.95fr;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
     gap: 14px;
 }
 
@@ -420,3 +420,135 @@
         align-items: flex-start;
     }
 }
+
+.pieContainer {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-top: 10px;
+}
+
+.pieVisual {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    flex-shrink: 0;
+}
+
+.pieChart {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    /* For a hollow pie (donut), use a mask or pseudo-element */
+}
+
+.pieChart::after {
+    content: "";
+    position: absolute;
+    inset: 22%;
+    border-radius: 50%;
+    background: #0f131a; /* Match panel background */
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.pieLegend {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+}
+
+.pieLegendItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pieLegendColor {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.pieLegendText {
+    display: flex;
+    flex-direction: column;
+    color: #edf4ff;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.pieLegendText small {
+    color: #8797ab;
+    font-size: 12px;
+}
+
+.pieCenterText {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+.pieCenterText strong {
+    font-size: 20px;
+    color: #f2f7ff;
+    line-height: 1.1;
+    font-family: "Space Grotesk", "Noto Sans TC", sans-serif;
+}
+
+.pieCenterText span {
+    font-size: 11px;
+    color: #8b99ad;
+}
+
+.topCharWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 10px;
+}
+
+.topCharSection {
+    background: rgba(12, 16, 22, 0.4);
+    border: 1px solid rgba(103, 128, 160, 0.1);
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.topCharSection h4 {
+    margin: 0 0 10px;
+    font-size: 13px;
+    color: #aebbd0;
+}
+
+.topCharList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.topCharRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(22, 28, 38, 0.6);
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.topCharRow span {
+    color: #edf4ff;
+}
+
+.topCharRow strong {
+    color: #69b7ff;
+    font-family: "Space Grotesk", "Noto Sans TC", sans-serif;
+}
+

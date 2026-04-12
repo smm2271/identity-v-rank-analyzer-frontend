@@ -11,11 +11,7 @@ import {
 import { useUserAuthStore } from "../../../service/user_auth.service";
 import styles from "./dashboard-overview.module.css";
 
-const MATCH_TYPE_LABEL: Record<number, string> = {
-    1: "排位",
-    2: "匹配",
-    3: "五人制",
-};
+import dataDict from "../../../../data.json";
 
 function formatDateTime(value: string | null): string {
     if (!value) return "-";
@@ -34,7 +30,92 @@ function formatDateTime(value: string | null): string {
 
 function formatMatchType(matchType: number | null): string {
     if (matchType === null) return "未知";
-    return MATCH_TYPE_LABEL[matchType] ?? `類型 ${matchType}`;
+    return (dataDict.mode as any)[String(matchType)] ?? `類型 ${matchType}`;
+}
+
+function formatCharacter(pid: number | null): string {
+    if (pid === null) return "-";
+    return (dataDict.character as any)[String(pid)] ?? `角色 ${pid}`;
+}
+
+function formatMap(scene_id: number | null): string {
+    if (scene_id === null) return "未知";
+    return (dataDict as Record<string, any>).map?.[String(scene_id)] ?? `地圖 ${scene_id}`;
+}
+
+type PieData = { label: string; value: number; color: string; sublabel?: string };
+
+function RenderPieChart({ data, centerTitle, centerSub }: { data: PieData[]; centerTitle: string; centerSub: string }) {
+    const total = data.reduce((sum, item) => sum + item.value, 0);
+
+    if (total === 0) {
+        return <div className={styles.stateBox}>無資料</div>;
+    }
+
+    let cumulative = 0;
+    const gradients = data.map((item) => {
+        const percent = (item.value / total) * 100;
+        const start = cumulative;
+        const end = cumulative + percent;
+        cumulative = end;
+        return `${item.color} ${start}% ${end}%`;
+    }).join(", ");
+
+    return (
+        <div className={styles.pieContainer}>
+            <div className={styles.pieVisual}>
+                <div className={styles.pieChart} style={{ background: `conic-gradient(${gradients})` }} />
+                <div className={styles.pieCenterText}>
+                    <strong>{centerTitle}</strong>
+                    <span>{centerSub}</span>
+                </div>
+            </div>
+            <div className={styles.pieLegend}>
+                {data.map((item) => (
+                    <div key={item.label} className={styles.pieLegendItem}>
+                        <div className={styles.pieLegendColor} style={{ backgroundColor: item.color }} />
+                        <div className={styles.pieLegendText}>
+                            <span>{item.label}</span>
+                            <small>{item.value} 場 ({((item.value / total) * 100).toFixed(1)}%) {item.sublabel ?? ""}</small>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function getTopUsed(items: MatchItem[], role: number, limit = 3) {
+    const counts: Record<number, number> = {};
+    for (const item of items) {
+        if (item.utype === role && item.pid !== null) {
+            counts[item.pid] = (counts[item.pid] ?? 0) + 1;
+        }
+    }
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    return sorted.slice(0, limit).map(([pidStr, count]) => ({
+        pid: parseInt(pidStr, 10),
+        count
+    }));
+}
+
+function calculateResults(items: MatchItem[], role: number) {
+    let win = 0, tie = 0, loss = 0;
+    for (const item of items) {
+        if (item.utype !== role || item.match_type === 3 || item.match_type === 10) continue; // Exclude 5v5 code "3" or "10"
+        if (item.kill_num === null) continue;
+
+        if (role === 1) { // Hunter
+            if (item.kill_num >= 3) win++;
+            else if (item.kill_num === 2) tie++;
+            else loss++;
+        } else if (role === 2) { // Survivor
+            if (item.kill_num <= 1) win++;
+            else if (item.kill_num === 2) tie++;
+            else loss++;
+        }
+    }
+    return { win, tie, loss, total: win + tie + loss };
 }
 
 
@@ -174,6 +255,35 @@ export default function DashboardOverviewPage() {
     const matchCounts = useMemo(() => aggregateCounts(recentMatches), [recentMatches]);
     const topMatchType = useMemo(() => pickTopEntry(matchCounts), [matchCounts]);
     const loadedMatchCount = recentMatches.length;
+
+    const mapCounts = useMemo(() => {
+        const counts: Record<string, number> = {};
+        for (const item of recentMatches) {
+            if (item.scene_id !== null) {
+                const key = formatMap(item.scene_id);
+                counts[key] = (counts[key] ?? 0) + 1;
+            }
+        }
+        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+        const top5 = sorted.slice(0, 5);
+        const others = sorted.slice(5).reduce((sum, item) => sum + item[1], 0);
+
+        const colors = ["#4D9CFF", "#FF885E", "#FFCA4D", "#9B6BFF", "#4DD2FF", "#7C8CA0"];
+        const pieData: PieData[] = top5.map(([label, value], i) => ({
+            label, value, color: colors[i % colors.length]
+        }));
+        if (others > 0) {
+            pieData.push({ label: "其他地圖", value: others, color: colors[5] });
+        }
+        return pieData;
+    }, [recentMatches]);
+
+    const topHunters = useMemo(() => getTopUsed(recentMatches, 1), [recentMatches]);
+    const topSurvivors = useMemo(() => getTopUsed(recentMatches, 2), [recentMatches]);
+
+    const hunterResults = useMemo(() => calculateResults(recentMatches, 1), [recentMatches]);
+    const survivorResults = useMemo(() => calculateResults(recentMatches, 2), [recentMatches]);
+
     const averageKills = useMemo(() => {
         const killValues = recentMatches.flatMap((item) => (item.kill_num === null ? [] : [item.kill_num]));
         if (killValues.length === 0) return null;
@@ -362,7 +472,7 @@ export default function DashboardOverviewPage() {
                                     className={`${styles.pidChip} ${selectedPid === item.pid ? styles.pidChipActive : ""}`}
                                     onClick={() => setSelectedPid(item.pid)}
                                 >
-                                    {item.pid}
+                                    {formatCharacter(item.pid)}
                                 </button>
                             ))}
                         </div>
@@ -378,12 +488,16 @@ export default function DashboardOverviewPage() {
                         <div className={styles.lineChartWrap}>
                             <div className={styles.lineChartMeta}>
                                 <div>
-                                    <span>角色 ID</span>
-                                    <strong>{selectedPid}</strong>
+                                    <span>選定角色</span>
+                                    <strong>{formatCharacter(selectedPid)}</strong>
                                 </div>
                                 <div>
                                     <span>最新分數</span>
                                     <strong>{selectedHistory[selectedHistory.length - 1]?.score ?? "-"}</strong>
+                                </div>
+                                <div>
+                                    <span>區間最高</span>
+                                    <strong>{scoreBounds.max > 0 ? scoreBounds.max : "-"}</strong>
                                 </div>
                                 <div>
                                     <span>區間變化</span>
@@ -455,7 +569,7 @@ export default function DashboardOverviewPage() {
                                         onClick={() => setSelectedPid(item.pid)}
                                     >
                                         <div className={styles.scoreRowTop}>
-                                            <strong>角色 {item.pid}</strong>
+                                            <strong>{formatCharacter(item.pid)}</strong>
                                             <span>{item.score}</span>
                                         </div>
                                         <div className={styles.scoreTrack}>
@@ -466,6 +580,109 @@ export default function DashboardOverviewPage() {
                                 );
                             })}
                         </div>
+                    )}
+                </article>
+
+                <article className={styles.panel}>
+                    <div className={styles.panelHeader}>
+                        <div>
+                            <p className={styles.panelKicker}>對局分析</p>
+                            <h3>地圖出現比例</h3>
+                        </div>
+                    </div>
+                    {mapCounts.length > 0 ? (
+                        <RenderPieChart
+                            data={mapCounts}
+                            centerTitle="地圖"
+                            centerSub={`${mapCounts.reduce((s, i) => s + i.value, 0)} 場`}
+                        />
+                    ) : (
+                        <div className={styles.stateBox}>無地圖資料</div>
+                    )}
+                </article>
+
+                <article className={styles.panel}>
+                    <div className={styles.panelHeader}>
+                        <div>
+                            <p className={styles.panelKicker}>出戰頻率</p>
+                            <h3>常用角色 (前三名)</h3>
+                        </div>
+                    </div>
+                    <div className={styles.topCharWrap}>
+                        <div className={styles.topCharSection}>
+                            <h4>監管陣營</h4>
+                            {topHunters.length > 0 ? (
+                                <div className={styles.topCharList}>
+                                    {topHunters.map((h) => (
+                                        <div key={h.pid} className={styles.topCharRow}>
+                                            <span>{formatCharacter(h.pid)}</span>
+                                            <strong>{h.count} 場</strong>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className={styles.hint} style={{ margin: 0 }}>無監管紀錄</p>
+                            )}
+                        </div>
+                        <div className={styles.topCharSection}>
+                            <h4>求生陣營</h4>
+                            {topSurvivors.length > 0 ? (
+                                <div className={styles.topCharList}>
+                                    {topSurvivors.map((s) => (
+                                        <div key={s.pid} className={styles.topCharRow}>
+                                            <span>{formatCharacter(s.pid)}</span>
+                                            <strong>{s.count} 場</strong>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className={styles.hint} style={{ margin: 0 }}>無求生紀錄</p>
+                            )}
+                        </div>
+                    </div>
+                </article>
+
+                <article className={styles.panel}>
+                    <div className={styles.panelHeader}>
+                        <div>
+                            <p className={styles.panelKicker}>陣營總體</p>
+                            <h3>監管對局結果</h3>
+                        </div>
+                    </div>
+                    {hunterResults.total > 0 ? (
+                        <RenderPieChart
+                            data={[
+                                { label: "勝場", value: hunterResults.win, color: "#66C2FF", sublabel: "(3-4殺)" },
+                                { label: "平局", value: hunterResults.tie, color: "#9CA4AB", sublabel: "(2殺)" },
+                                { label: "敗場", value: hunterResults.loss, color: "#FF7B7B", sublabel: "(0-1殺)" },
+                            ].filter((d) => d.value > 0)}
+                            centerTitle={hunterResults.total === 0 ? "0%" : `${((hunterResults.win / hunterResults.total) * 100).toFixed(1)}%`}
+                            centerSub={`共 ${hunterResults.total} 場`}
+                        />
+                    ) : (
+                        <div className={styles.stateBox}>無監管排位/匹配紀錄</div>
+                    )}
+                </article>
+
+                <article className={styles.panel}>
+                    <div className={styles.panelHeader}>
+                        <div>
+                            <p className={styles.panelKicker}>陣營總體</p>
+                            <h3>求生對局結果</h3>
+                        </div>
+                    </div>
+                    {survivorResults.total > 0 ? (
+                        <RenderPieChart
+                            data={[
+                                { label: "勝場", value: survivorResults.win, color: "#66C2FF", sublabel: "(遇0-1跑)" },
+                                { label: "平局", value: survivorResults.tie, color: "#9CA4AB", sublabel: "(遇2跑)" },
+                                { label: "敗場", value: survivorResults.loss, color: "#FF7B7B", sublabel: "(遇3-4殺)" },
+                            ].filter((d) => d.value > 0)}
+                            centerTitle={survivorResults.total === 0 ? "0%" : `${((survivorResults.win / survivorResults.total) * 100).toFixed(1)}%`}
+                            centerSub={`共 ${survivorResults.total} 場`}
+                        />
+                    ) : (
+                        <div className={styles.stateBox}>無求生排位/匹配紀錄</div>
                     )}
                 </article>
             </section>
