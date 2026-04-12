@@ -76,36 +76,31 @@ export default function MatchHistoryPage() {
     const [limit, setLimit] = useState(20);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+    const [expandedId, setExpandedId] = useState<string | null>(null);
     const [matchDetails, setMatchDetails] = useState<Record<string, MatchDetailResponse>>({});
     const [loadingDetails, setLoadingDetails] = useState<Set<string>>(new Set());
 
     function toggleExpand(id: string) {
-        setExpandedIds((prev) => {
-            const next = new Set(prev);
-            const isExpanding = !next.has(id);
-            if (isExpanding) {
-                next.add(id);
-                if (!matchDetails[id] && !loadingDetails.has(id)) {
-                    setLoadingDetails((l) => new Set(l).add(id));
-                    getMatchDetail(id)
-                        .then((detail) => {
-                            setMatchDetails((prevDetails) => ({ ...prevDetails, [id]: detail }));
-                        })
-                        .catch(console.error)
-                        .finally(() => {
-                            setLoadingDetails((l) => {
-                                const nl = new Set(l);
-                                nl.delete(id);
-                                return nl;
-                            });
-                        });
-                }
-            } else {
-                next.delete(id);
-            }
-            return next;
-        });
+        if (expandedId === id) {
+            setExpandedId(null);
+            return;
+        }
+        setExpandedId(id);
+        if (!matchDetails[id] && !loadingDetails.has(id)) {
+            setLoadingDetails((l) => new Set(l).add(id));
+            getMatchDetail(id)
+                .then((detail) => {
+                    setMatchDetails((prevDetails) => ({ ...prevDetails, [id]: detail }));
+                })
+                .catch(console.error)
+                .finally(() => {
+                    setLoadingDetails((l) => {
+                        const nl = new Set(l);
+                        nl.delete(id);
+                        return nl;
+                    });
+                });
+        }
     }
 
     useEffect(() => {
@@ -205,11 +200,11 @@ export default function MatchHistoryPage() {
                             {items.map((match) => (
                                 <Fragment key={match.id}>
                                     <tr 
-                                        className={`${styles.tableRow} ${expandedIds.has(match.id) ? styles.tableRowActive : ""}`} 
+                                        className={`${styles.tableRow} ${expandedId === match.id ? styles.tableRowActive : ""}`} 
                                         onClick={() => toggleExpand(match.id)}
                                         style={{ cursor: "pointer" }}
                                         ref={(el) => {
-                                            if (el && expandedIds.has(match.id)) {
+                                            if (el && expandedId === match.id) {
                                                 requestAnimationFrame(() => {
                                                     el.scrollIntoView({ behavior: "smooth", block: "start" });
                                                 });
@@ -224,7 +219,7 @@ export default function MatchHistoryPage() {
                                         <td>{match.rank_level ?? "-"}</td>
                                         <td className={styles.uuid}>{match.room_guuid}</td>
                                     </tr>
-                                    {expandedIds.has(match.id) && (
+                                    {expandedId === match.id && (
                                         <tr className={styles.expandedRow}>
                                             <td colSpan={7}>
                                                 <div className={styles.expandedContent}>
