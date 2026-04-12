@@ -4,6 +4,9 @@
     background: rgba(12, 15, 20, 0.9);
     padding: 20px;
     box-shadow: 0 16px 28px rgba(0, 0, 0, 0.35);
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 60px);
 }
 
 .toolbar {
@@ -55,6 +58,9 @@
 }
 
 .tableWrap {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
     overflow-x: auto;
     border: 1px solid #2a3340;
     border-radius: 14px;
@@ -67,6 +73,9 @@
 }
 
 .table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     background: linear-gradient(120deg, #1f2a3a, #1a2432);
 }
 
@@ -171,6 +180,11 @@
     border: 1px solid rgba(86, 120, 168, 0.15);
 }
 
+@keyframes slideRightExp {
+    0% { width: 0; }
+    100% { width: var(--target-width); }
+}
+
 .cipherTrack {
     position: absolute;
     top: 0;
@@ -179,8 +193,9 @@
     background: linear-gradient(270deg, rgba(255, 202, 77, 0.4), rgba(255, 202, 77, 1));
     /* border-right: 2px solid #fff3a1; */
     border-radius: 6px;
-    transition: width 0.3s ease;
     pointer-events: none;
+    width: 0;
+    animation: slideRightExp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 .cipherKey {

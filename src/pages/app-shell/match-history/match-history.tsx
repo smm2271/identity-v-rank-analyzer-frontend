@@ -281,7 +281,7 @@ export default function MatchHistoryPage() {
                                                                                         <strong className={styles.cipherVal}>{Math.round(val)}%</strong>
                                                                                     </div>
                                                                                     <div className={styles.cipherBarBg}>
-                                                                                        <div className={styles.cipherTrack} style={{ width: `${percent}%` }} />
+                                                                                        <div className={styles.cipherTrack} style={{ '--target-width': `${percent}%` } as React.CSSProperties} />
                                                                                     </div>
                                                                                 </div>
                                                                             );
