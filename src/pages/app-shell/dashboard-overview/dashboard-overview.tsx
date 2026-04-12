@@ -94,7 +94,7 @@ function getTopUsed(items: MatchItem[], role: number, limit = 3) {
     }
     const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
     return sorted.slice(0, limit).map(([pidStr, count]) => ({
-        pid: parseInt(pidStr, 10),
+        pid: Number.parseInt(pidStr, 10),
         count
     }));
 }
