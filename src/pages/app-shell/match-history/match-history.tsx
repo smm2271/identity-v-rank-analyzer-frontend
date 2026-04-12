@@ -1,18 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Fragment } from "react";
 import { ApiError } from "../../../service/api";
-import { getMyMatches, type MatchItem } from "../../../service/match.service";
+import { getMyMatches, getMatchDetail, type MatchItem, type MatchDetailResponse } from "../../../service/match.service";
 import styles from "./match-history.module.css";
 
-const MATCH_TYPE_LABEL: Record<number, string> = {
-    1: "排位",
-    2: "匹配",
-    3: "五人制",
-};
-
-const UTYPE_LABEL: Record<number, string> = {
-    1: "監管",
-    2: "求生",
-};
+import dataDict from "../../../../data.json";
 
 function formatDateTime(value: string | null): string {
     if (!value) return "-";
@@ -29,12 +20,53 @@ function formatDateTime(value: string | null): string {
 
 function formatMatchType(matchType: number | null): string {
     if (matchType === null) return "未知";
-    return MATCH_TYPE_LABEL[matchType] ?? `類型 ${matchType}`;
+    return (dataDict.mode as any)[String(matchType)] ?? `類型 ${matchType}`;
 }
 
 function formatRole(utype: number | null): string {
     if (utype === null) return "未知";
-    return UTYPE_LABEL[utype] ?? `角色 ${utype}`;
+    // 1: 監管, 2: 求生 (Usually Identity-V specific utype encoding)
+    return utype === 1 ? "監管" : utype === 2 ? "求生" : `角色定位 ${utype}`;
+}
+
+function formatCharacter(pid: number | null): string {
+    if (pid === null) return "-";
+    return (dataDict.character as any)[String(pid)] ?? `角色 ${pid}`;
+}
+
+function formatMap(scene_id: number | null): string {
+    if (scene_id === null) return "未知";
+    return (dataDict as Record<string, any>).map?.[String(scene_id)] ?? `地圖 ${scene_id}`;
+}
+
+function formatPlayerResType(resType: number | null, killNum: number | null): string {
+    if (resType !== null && (dataDict as any).res_type) {
+        for (const [label, values] of Object.entries((dataDict as any).res_type)) {
+            if (Array.isArray(values) && values.includes(resType)) {
+                return label;
+            }
+        }
+    }
+    
+    // 如果對不上 dataDict 的逃脫/迷失，推定為監管者，用 killNum 計算大獲全勝等
+    if (killNum !== null) {
+        if (killNum >= 3) return "大獲全勝";
+        if (killNum === 2) return "勉強獲勝";
+        return "一敗塗地";
+    }
+
+    return resType === null ? "" : String(resType);
+}
+
+function isPlayerHunter(resType: number | null): boolean {
+    if (resType !== null && (dataDict as any).res_type) {
+        for (const values of Object.values((dataDict as any).res_type)) {
+            if (Array.isArray(values) && values.includes(resType)) {
+                return false;
+            }
+        }
+    }
+    return true; // Not mapped to survivor means it's the hunter
 }
 
 export default function MatchHistoryPage() {
@@ -44,6 +76,37 @@ export default function MatchHistoryPage() {
     const [limit, setLimit] = useState(20);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+    const [matchDetails, setMatchDetails] = useState<Record<string, MatchDetailResponse>>({});
+    const [loadingDetails, setLoadingDetails] = useState<Set<string>>(new Set());
+
+    function toggleExpand(id: string) {
+        setExpandedIds((prev) => {
+            const next = new Set(prev);
+            const isExpanding = !next.has(id);
+            if (isExpanding) {
+                next.add(id);
+                if (!matchDetails[id] && !loadingDetails.has(id)) {
+                    setLoadingDetails((l) => new Set(l).add(id));
+                    getMatchDetail(id)
+                        .then((detail) => {
+                            setMatchDetails((prevDetails) => ({ ...prevDetails, [id]: detail }));
+                        })
+                        .catch(console.error)
+                        .finally(() => {
+                            setLoadingDetails((l) => {
+                                const nl = new Set(l);
+                                nl.delete(id);
+                                return nl;
+                            });
+                        });
+                }
+            } else {
+                next.delete(id);
+            }
+            return next;
+        });
+    }
 
     useEffect(() => {
         let active = true;
@@ -140,15 +203,101 @@ export default function MatchHistoryPage() {
                         </thead>
                         <tbody>
                             {items.map((match) => (
-                                <tr key={match.id}>
-                                    <td>{formatDateTime(match.game_save_time ?? match.created_at)}</td>
-                                    <td>{formatMatchType(match.match_type)}</td>
-                                    <td>{formatRole(match.utype)}</td>
-                                    <td>{match.pid ?? "-"}</td>
-                                    <td>{match.kill_num ?? "-"}</td>
-                                    <td>{match.rank_level ?? "-"}</td>
-                                    <td className={styles.uuid}>{match.room_guuid}</td>
-                                </tr>
+                                <Fragment key={match.id}>
+                                    <tr 
+                                        className={`${styles.tableRow} ${expandedIds.has(match.id) ? styles.tableRowActive : ""}`} 
+                                        onClick={() => toggleExpand(match.id)}
+                                        style={{ cursor: "pointer" }}
+                                    >
+                                        <td>{formatDateTime(match.game_save_time ?? match.created_at)}</td>
+                                        <td>{formatMatchType(match.match_type)}</td>
+                                        <td>{formatRole(match.utype)}</td>
+                                        <td>{formatCharacter(match.pid)}</td>
+                                        <td>{match.kill_num ?? "-"}</td>
+                                        <td>{match.rank_level ?? "-"}</td>
+                                        <td className={styles.uuid}>{match.room_guuid}</td>
+                                    </tr>
+                                    {expandedIds.has(match.id) && (
+                                        <tr className={styles.expandedRow}>
+                                            <td colSpan={7}>
+                                                <div className={styles.expandedContent}>
+                                                    <h4>對局詳細資訊</h4>
+                                                    <div className={styles.expandedGrid}>
+                                                        <div>
+                                                            <span>使用角色</span>
+                                                            <strong>{formatCharacter(match.pid)}</strong>
+                                                        </div>
+                                                        <div>
+                                                            <span>對戰地圖</span>
+                                                            <strong>{formatMap(match.scene_id)}</strong>
+                                                        </div>
+                                                        <div>
+                                                            <span>段位階級</span>
+                                                            <strong>{match.rank_level ?? "未知"}</strong>
+                                                        </div>
+                                                        <div>
+                                                            <span>資料建立時間</span>
+                                                            <strong>{formatDateTime(match.created_at)}</strong>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    {match.cipher_progress && Object.keys(match.cipher_progress).length > 0 && (
+                                                        <div className={styles.cipherSection}>
+                                                            <h5>密碼機進度</h5>
+                                                            <div className={styles.cipherGrid}>
+                                                                {Object.entries(match.cipher_progress).map(([key, val]) => {
+                                                                    const numVal = Number(val) || 0;
+                                                                    const maxProg = Math.max(...Object.values(match.cipher_progress!).map(v => Number(v) || 0), 100);
+                                                                    const percent = (numVal / maxProg) * 100;
+                                                                    
+                                                                    return (
+                                                                        <div key={key} className={styles.cipherItem}>
+                                                                            <div className={styles.cipherTrack} style={{ width: `${percent}%` }} />
+                                                                            <div className={styles.cipherContent}>
+                                                                                <span className={styles.cipherKey}>{key}</span>
+                                                                                <strong className={styles.cipherVal}>{numVal}%</strong>
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {loadingDetails.has(match.id) ? (
+                                                        <p className={styles.detailLoading}>正在載入同局玩家資訊...</p>
+                                                    ) : matchDetails[match.id]?.players && matchDetails[match.id].players.length > 0 && (
+                                                        <div className={styles.playersSection}>
+                                                            <h5>同局玩家</h5>
+                                                            <div className={styles.playersGrid}>
+                                                                {[...matchDetails[match.id].players]
+                                                                    .sort((a, b) => {
+                                                                        const aH = isPlayerHunter(a.res_type);
+                                                                        const bH = isPlayerHunter(b.res_type);
+                                                                        if (aH && !bH) return -1;
+                                                                        if (!aH && bH) return 1;
+                                                                        return 0;
+                                                                    })
+                                                                    .map(player => {
+                                                                        const isHunter = isPlayerHunter(player.res_type);
+                                                                        return (
+                                                                            <div key={player.id} className={`${styles.playerCard} ${isHunter ? styles.playerCardHunter : styles.playerCardSurvivor}`}>
+                                                                                <div className={styles.playerRoleWrap}>
+                                                                                    <strong className={styles.playerRole}>{formatCharacter(player.character_id)}</strong>
+                                                                                    <span className={styles.playerResType}>{formatPlayerResType(player.res_type, match.kill_num)}</span>
+                                                                                </div>
+                                                                                <span className={styles.playerName}>{player.player_name || "匿名玩家"}</span>
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </Fragment>
                             ))}
                         </tbody>
                     </table>

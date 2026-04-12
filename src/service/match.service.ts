@@ -16,6 +16,19 @@ export interface MatchItem {
     created_at: string;
 }
 
+export interface PlayerInfoItem {
+    id: string;
+    player_id: number;
+    player_name: string | null;
+    character_id: number;
+    res_type: number | null;
+    created_at: string;
+}
+
+export interface MatchDetailResponse extends MatchItem {
+    players: PlayerInfoItem[];
+}
+
 export interface LadderScoreItem {
     id: string;
     user_id: string;
@@ -68,4 +81,8 @@ export async function getLadderScoreHistory(pid: number, limit = 60): Promise<La
         },
         getAuthHeaders(),
     );
+}
+
+export async function getMatchDetail(matchId: string): Promise<MatchDetailResponse> {
+    return get<MatchDetailResponse>(`/api/v1/matches/${matchId}`, undefined, getAuthHeaders());
 }
