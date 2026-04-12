@@ -47,7 +47,7 @@ function getAuthHeaders(): Record<string, string> | undefined {
 
 export async function getMyMatches(offset: number, limit: number): Promise<MatchListResponse> {
     return get<MatchListResponse>(
-        "/v1/matches",
+        "/api/v1/matches",
         {
             offset: String(offset),
             limit: String(limit),
@@ -57,12 +57,12 @@ export async function getMyMatches(offset: number, limit: number): Promise<Match
 }
 
 export async function getLatestLadderScores(): Promise<LatestLadderScoresResponse> {
-    return get<LatestLadderScoresResponse>("/v1/matches/ladder-scores/latest", undefined, getAuthHeaders());
+    return get<LatestLadderScoresResponse>("/api/v1/matches/ladder-scores/latest", undefined, getAuthHeaders());
 }
 
 export async function getLadderScoreHistory(pid: number, limit = 60): Promise<LadderScoresListResponse> {
     return get<LadderScoresListResponse>(
-        `/v1/matches/ladder-scores/${pid}`,
+        `/api/v1/matches/ladder-scores/${pid}`,
         {
             limit: String(limit),
         },
