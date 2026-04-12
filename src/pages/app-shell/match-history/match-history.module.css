@@ -64,6 +64,32 @@
     overflow-x: auto;
     border: 1px solid #2a3340;
     border-radius: 14px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(79, 125, 255, 0.35) rgba(12, 15, 20, 0.6);
+}
+
+.tableWrap::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.tableWrap::-webkit-scrollbar-track {
+    background: rgba(12, 15, 20, 0.6);
+    border-radius: 4px;
+}
+
+.tableWrap::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(79, 125, 255, 0.4), rgba(40, 226, 192, 0.3));
+    border-radius: 4px;
+    border: 1px solid rgba(79, 125, 255, 0.15);
+}
+
+.tableWrap::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(79, 125, 255, 0.6), rgba(40, 226, 192, 0.5));
+}
+
+.tableWrap::-webkit-scrollbar-corner {
+    background: rgba(12, 15, 20, 0.6);
 }
 
 .table {
