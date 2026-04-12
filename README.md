@@ -1,75 +1,66 @@
-# React + TypeScript + Vite
+# Identity V Rank Analyzer - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+這是一個基於 React 19 開發的現代化遊戲資料分析前端介面。
+專注於清晰的操作流程、穩定的登入體驗，以及可擴充的應用架構。
 
-Currently, two official plugins are available:
+「千場對局，逐步分析，讓你看見個人趨勢。」
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 專案亮點
 
-## React Compiler
+- 現代化 UI/UX：以簡潔卡片式資訊呈現，降低閱讀負擔。
+- 響應式設計：同時適配桌面端與行動端瀏覽器。
+- 完整認證流程：包含登入、註冊、OAuth、Token 自動刷新與路由守護。
+- 錯誤處理：針對網路錯誤與認證失效提供即時回饋。
+- API Key 管理：支援建立與停用，強化外部整合能力。
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+## 關鍵技術棧
 
-Note: This will impact Vite dev & build performances.
+- 框架: React 19
+- 語言: TypeScript
+- 路由: React Router DOM 7
+- 樣式: CSS Modules
+- 狀態管理: Zustand
+- Markdown 文件渲染: react-markdown + remark-gfm
+- 建構工具: Vite 7
 
-## Expanding the ESLint configuration
+## 快速開始
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 安裝環境
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+確保您的開發環境已安裝 Node.js (建議 v20 以上)。
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+```bash
+# 安裝依賴
+npm install
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 啟動開發伺服器
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+開發伺服器預設為 http://localhost:3000
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 構建生產版本
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run build
+```
+
+建置完成後，輸出檔案位於 dist 目錄。
+
+## 專案架構摘要
+
+- src/pages/signin: 身份驗證中心（登入/註冊/OAuth 流程）。
+- src/pages/app-shell: 受保護的應用區域（Dashboard、歷史資料、API Keys）。
+- src/service/api.ts: API 請求封裝、ApiError、Token refresh 邏輯。
+- src/service/user_auth.service.ts: 使用者認證狀態與持久化管理。
+- src/share: 共用導覽元件（public-nav、signin-nav）。
+
+## 部署提醒
+
+若使用 Nginx 或 Nginx Proxy Manager，請確保 SPA fallback 設定正確：
+
+```nginx
+location / {
+  try_files $uri /index.html;
+}
 ```
