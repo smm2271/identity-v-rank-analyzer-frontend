@@ -30,7 +30,14 @@ export default function DashboardShell() {
 
     return (
         <div className={`${styles.shell} ${sidebarOpen ? styles.shellOpen : ""}`}>
-            {sidebarOpen && <div className={styles.backdrop} onClick={() => setSidebarOpen(false)} />}
+            {sidebarOpen && (
+                <button
+                    type="button"
+                    className={styles.backdrop}
+                    onClick={() => setSidebarOpen(false)}
+                    aria-label="Close sidebar"
+                />
+            )}
             <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ""}`}>
                 <div className={styles.brand}>
                     <span className={styles.brandBadge}>IDV</span>
