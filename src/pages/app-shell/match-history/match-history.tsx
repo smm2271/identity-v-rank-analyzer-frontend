@@ -241,28 +241,55 @@ export default function MatchHistoryPage() {
                                                         </div>
                                                     </div>
                                                     
-                                                    {match.cipher_progress && Object.keys(match.cipher_progress).length > 0 && (
-                                                        <div className={styles.cipherSection}>
-                                                            <h5>密碼機進度</h5>
-                                                            <div className={styles.cipherGrid}>
-                                                                {Object.entries(match.cipher_progress).map(([key, val]) => {
-                                                                    const numVal = Number(val) || 0;
-                                                                    const maxProg = Math.max(...Object.values(match.cipher_progress!).map(v => Number(v) || 0), 100);
-                                                                    const percent = (numVal / maxProg) * 100;
-                                                                    
-                                                                    return (
-                                                                        <div key={key} className={styles.cipherItem}>
-                                                                            <div className={styles.cipherTrack} style={{ width: `${percent}%` }} />
-                                                                            <div className={styles.cipherContent}>
-                                                                                <span className={styles.cipherKey}>{key}</span>
-                                                                                <strong className={styles.cipherVal}>{numVal}%</strong>
-                                                                            </div>
-                                                                        </div>
-                                                                    );
-                                                                })}
-                                                            </div>
-                                                        </div>
-                                                    )}
+                                                        {(() => {
+                                                            let cipherData: number[] = [];
+                                                            if (match.cipher_progress) {
+                                                                if (Array.isArray(match.cipher_progress)) {
+                                                                    cipherData = match.cipher_progress.map(Number);
+                                                                } else {
+                                                                    Object.values(match.cipher_progress).forEach(val => {
+                                                                        if (Array.isArray(val)) {
+                                                                            cipherData.push(...val.map(Number));
+                                                                        } else {
+                                                                            cipherData.push(Number(val));
+                                                                        }
+                                                                    });
+                                                                }
+                                                            }
+
+                                                            const validCiphers = cipherData.filter(v => v >= 0 && !Number.isNaN(v));
+                                                            if (validCiphers.length === 0) return null;
+
+                                                            let normalized = validCiphers;
+                                                            const highest = Math.max(...validCiphers, 0);
+                                                            if (highest > 0 && highest <= 1.0) {
+                                                                normalized = validCiphers.map(v => v * 100);
+                                                            }
+
+                                                            const maxProg = Math.max(...normalized, 100);
+
+                                                            return (
+                                                                <div className={styles.cipherSection}>
+                                                                    <h5>密碼機進度</h5>
+                                                                    <div className={styles.cipherGrid}>
+                                                                        {normalized.map((val, index) => {
+                                                                            const percent = (val / maxProg) * 100;
+                                                                            return (
+                                                                                <div key={index} className={styles.cipherItem}>
+                                                                                    <div className={styles.cipherLabel}>
+                                                                                        <span className={styles.cipherKey}>密碼機 {index + 1}</span>
+                                                                                        <strong className={styles.cipherVal}>{Math.round(val)}%</strong>
+                                                                                    </div>
+                                                                                    <div className={styles.cipherBarBg}>
+                                                                                        <div className={styles.cipherTrack} style={{ width: `${percent}%` }} />
+                                                                                    </div>
+                                                                                </div>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })()}
 
                                                     {loadingDetails.has(match.id) ? (
                                                         <p className={styles.detailLoading}>正在載入同局玩家資訊...</p>
