@@ -330,7 +330,7 @@ export default function MatchHistoryPage() {
                                 <th>對戰時間</th>
                                 <th>模式</th>
                                 <th>陣營</th>
-                                <th>角色名</th>
+                                <th>使用角色</th>
                                 <th>淘汰人數</th>
                             </tr>
                         </thead>
