@@ -79,6 +79,10 @@ export default function MatchHistoryPage() {
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [matchDetails, setMatchDetails] = useState<Record<string, MatchDetailResponse>>({});
     const [loadingDetails, setLoadingDetails] = useState<Set<string>>(new Set());
+    const [modeFilter, setModeFilter] = useState<string>("all");
+    const [roleFilter, setRoleFilter] = useState<string>("all");
+    const [characterKeyword, setCharacterKeyword] = useState("");
+    const [sortBy, setSortBy] = useState<"timeDesc" | "timeAsc" | "killDesc" | "killAsc">("timeDesc");
 
     function toggleExpand(id: string) {
         if (expandedId === id) {
@@ -138,6 +142,51 @@ export default function MatchHistoryPage() {
     const hasPrev = offset > 0;
     const hasNext = offset + limit < total;
 
+    const modeFilterOptions = useMemo(() => {
+        const options = Array.from(new Set(items.map((item) => formatMatchType(item.match_type))));
+        return options.sort((a, b) => a.localeCompare(b, "zh-TW"));
+    }, [items]);
+
+    const filteredAndSortedItems = useMemo(() => {
+        const keyword = characterKeyword.trim().toLowerCase();
+
+        const filtered = items.filter((item) => {
+            if (modeFilter !== "all" && formatMatchType(item.match_type) !== modeFilter) return false;
+
+            if (roleFilter !== "all") {
+                const targetRole = roleFilter === "hunter" ? 1 : 2;
+                if (item.utype !== targetRole) return false;
+            }
+
+            if (keyword) {
+                const characterName = formatCharacter(item.pid).toLowerCase();
+                if (!characterName.includes(keyword)) return false;
+            }
+
+            return true;
+        });
+
+        return filtered.sort((a, b) => {
+            const dateA = new Date(a.game_save_time ?? a.created_at ?? 0).getTime();
+            const dateB = new Date(b.game_save_time ?? b.created_at ?? 0).getTime();
+            const killA = a.kill_num ?? -1;
+            const killB = b.kill_num ?? -1;
+
+            if (sortBy === "timeAsc") return dateA - dateB;
+            if (sortBy === "killDesc") return killB - killA;
+            if (sortBy === "killAsc") return killA - killB;
+            return dateB - dateA;
+        });
+    }, [items, modeFilter, roleFilter, characterKeyword, sortBy]);
+
+    useEffect(() => {
+        if (!expandedId) return;
+        const exists = filteredAndSortedItems.some((item) => item.id === expandedId);
+        if (!exists) {
+            setExpandedId(null);
+        }
+    }, [expandedId, filteredAndSortedItems]);
+
     function goPrev() {
         if (!hasPrev) return;
         setOffset((prev) => Math.max(0, prev - limit));
@@ -153,12 +202,20 @@ export default function MatchHistoryPage() {
         setOffset(0);
     }
 
+    function handleResetFilters() {
+        setModeFilter("all");
+        setRoleFilter("all");
+        setCharacterKeyword("");
+        setSortBy("timeDesc");
+        setExpandedId(null);
+    }
+
     return (
         <div className={styles.panel}>
             <div className={styles.toolbar}>
                 <div>
                     <h2>歷史戰績</h2>
-                    <p>已載入 {items.length} 筆，本帳號總計 {total} 筆。</p>
+                    <p>本頁已載入 {items.length} 筆，篩選後 {filteredAndSortedItems.length} 筆，本帳號總計 {total} 筆。</p>
                 </div>
 
                 <label className={styles.limitSelector} htmlFor="limit-select">
@@ -175,14 +232,78 @@ export default function MatchHistoryPage() {
                 </label>
             </div>
 
+            <div className={styles.filterBar}>
+                <label className={styles.filterItem} htmlFor="mode-filter-select">
+                    模式篩選
+                    <select
+                        id="mode-filter-select"
+                        value={modeFilter}
+                        onChange={(e) => setModeFilter(e.target.value)}
+                    >
+                        <option value="all">全部模式</option>
+                        {modeFilterOptions.map((mode) => (
+                            <option key={mode} value={mode}>{mode}</option>
+                        ))}
+                    </select>
+                </label>
+
+                <label className={styles.filterItem} htmlFor="role-filter-select">
+                    定位篩選
+                    <select
+                        id="role-filter-select"
+                        value={roleFilter}
+                        onChange={(e) => setRoleFilter(e.target.value)}
+                    >
+                        <option value="all">全部定位</option>
+                        <option value="hunter">監管</option>
+                        <option value="survivor">求生</option>
+                    </select>
+                </label>
+
+                <label className={styles.filterItem} htmlFor="character-keyword-input">
+                    角色關鍵字
+                    <input
+                        id="character-keyword-input"
+                        type="text"
+                        value={characterKeyword}
+                        onChange={(e) => setCharacterKeyword(e.target.value)}
+                        placeholder="輸入角色名稱"
+                    />
+                </label>
+
+                <label className={styles.filterItem} htmlFor="sort-by-select">
+                    排序
+                    <select
+                        id="sort-by-select"
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as "timeDesc" | "timeAsc" | "killDesc" | "killAsc")}
+                    >
+                        <option value="timeDesc">時間：新到舊</option>
+                        <option value="timeAsc">時間：舊到新</option>
+                        <option value="killDesc">擊殺：高到低</option>
+                        <option value="killAsc">擊殺：低到高</option>
+                    </select>
+                </label>
+
+                <div className={styles.filterResetWrap}>
+                    <button
+                        type="button"
+                        className={styles.filterResetButton}
+                        onClick={handleResetFilters}
+                    >
+                        重設
+                    </button>
+                </div>
+            </div>
+
             {loading && <div className={styles.stateBox}>讀取中...</div>}
             {!loading && error && <div className={`${styles.stateBox} ${styles.stateError}`}>{error}</div>}
 
-            {!loading && !error && items.length === 0 && (
+            {!loading && !error && filteredAndSortedItems.length === 0 && (
                 <div className={styles.stateBox}>目前還沒有對戰紀錄，先上傳一場來看看。</div>
             )}
 
-            {!loading && !error && items.length > 0 && (
+            {!loading && !error && filteredAndSortedItems.length > 0 && (
                 <div className={styles.tableWrap}>
                     <table className={styles.table}>
                         <thead>
@@ -192,12 +313,10 @@ export default function MatchHistoryPage() {
                                 <th>角色定位</th>
                                 <th>角色 ID</th>
                                 <th>擊殺</th>
-                                <th>段位</th>
-                                <th>房間 UUID</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {items.map((match) => (
+                            {filteredAndSortedItems.map((match) => (
                                 <Fragment key={match.id}>
                                     <tr 
                                         className={`${styles.tableRow} ${expandedId === match.id ? styles.tableRowActive : ""}`} 
@@ -216,12 +335,10 @@ export default function MatchHistoryPage() {
                                         <td>{formatRole(match.utype)}</td>
                                         <td>{formatCharacter(match.pid)}</td>
                                         <td>{match.kill_num ?? "-"}</td>
-                                        <td>{match.rank_level ?? "-"}</td>
-                                        <td className={styles.uuid}>{match.room_guuid}</td>
                                     </tr>
                                     {expandedId === match.id && (
                                         <tr className={styles.expandedRow}>
-                                            <td colSpan={7}>
+                                            <td colSpan={5}>
                                                 <div className={styles.expandedContent}>
                                                     <h4>對局詳細資訊</h4>
                                                     <div className={styles.expandedGrid}>
@@ -232,10 +349,6 @@ export default function MatchHistoryPage() {
                                                         <div>
                                                             <span>對戰地圖</span>
                                                             <strong>{formatMap(match.scene_id)}</strong>
-                                                        </div>
-                                                        <div>
-                                                            <span>段位階級</span>
-                                                            <strong>{match.rank_level ?? "未知"}</strong>
                                                         </div>
                                                         <div>
                                                             <span>資料建立時間</span>
