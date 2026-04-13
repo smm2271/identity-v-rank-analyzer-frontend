@@ -1,7 +1,7 @@
 .page {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 10px;
 }
 
 .heroCard {
@@ -96,8 +96,8 @@
 
 .metricGrid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
 }
 
 .metricCard,
@@ -110,23 +110,37 @@
 }
 
 .metricCard {
-    padding: 18px;
-    min-height: 132px;
+    padding: 14px;
+    min-height: 104px;
+}
+
+.metricCardHunter {
+    background:
+        radial-gradient(circle at top right, rgba(167, 52, 52, 0.16), transparent 40%),
+        linear-gradient(180deg, rgba(34, 16, 18, 0.96), rgba(24, 11, 13, 0.98));
+    border-color: rgba(181, 88, 88, 0.32);
+}
+
+.metricCardSurvivor {
+    background:
+        radial-gradient(circle at top right, rgba(69, 137, 214, 0.18), transparent 40%),
+        linear-gradient(180deg, rgba(14, 24, 39, 0.96), rgba(9, 16, 29, 0.98));
+    border-color: rgba(84, 138, 212, 0.3);
 }
 
 .label,
 .panelKicker {
     margin: 0;
     color: #7c8ca0;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
 
 .value {
-    margin: 10px 0 8px;
-    font-size: clamp(28px, 4vw, 40px);
+    margin: 6px 0 4px;
+    font-size: clamp(22px, 2.4vw, 32px);
     font-family: "Space Grotesk", "Noto Sans TC", sans-serif;
     font-weight: 800;
     color: #edf4ff;
@@ -141,26 +155,26 @@
 
 .chartGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
 }
 
 .panel {
-    padding: 18px;
-    min-height: 420px;
+    padding: 14px;
+    min-height: clamp(240px, 29vh, 320px);
 }
 
 .panelHeader {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 18px;
+    gap: 10px;
+    margin-bottom: 12px;
 }
 
 .panelHeader h3 {
-    margin: 6px 0 0;
-    font-size: 18px;
+    margin: 4px 0 0;
+    font-size: 16px;
     color: #f4f8ff;
 }
 
@@ -172,10 +186,10 @@
 }
 
 .stateBox {
-    padding: 18px;
+    padding: 12px;
     color: #b7c5d9;
-    font-size: 14px;
-    line-height: 1.7;
+    font-size: 13px;
+    line-height: 1.55;
 }
 
 .stateError {
@@ -186,12 +200,12 @@
 
 .modeChart {
     display: grid;
-    gap: 14px;
+    gap: 10px;
 }
 
 .modeBar {
     display: grid;
-    gap: 6px;
+    gap: 4px;
 }
 
 .modeBarTop,
@@ -219,7 +233,7 @@
 .modeBarTrack,
 .scoreTrack {
     width: 100%;
-    height: 10px;
+    height: 8px;
     overflow: hidden;
     border-radius: 999px;
     background: rgba(99, 118, 148, 0.18);
@@ -234,8 +248,8 @@
 }
 
 .modeSummary {
-    margin-top: 8px;
-    padding: 14px 16px;
+    margin-top: 4px;
+    padding: 10px 12px;
     border-radius: 16px;
     border: 1px solid rgba(103, 128, 160, 0.18);
     background: rgba(9, 13, 18, 0.8);
@@ -377,13 +391,55 @@
     color: #8797ab;
 }
 
+@media (max-width: 1600px) {
+    .chartGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
 @media (max-width: 1200px) {
     .metricGrid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .chartGrid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cardTotalMatches {
+        order: 1;
+    }
+
+    .cardSurvivorEscapeRate {
+        order: 2;
+    }
+
+    .cardHunterAverageKill {
+        order: 3;
+    }
+
+    .cardModeDistribution {
+        order: 1;
+    }
+
+    .cardHunterResults {
+        order: 2;
+    }
+
+    .cardSurvivorResults {
+        order: 3;
+    }
+
+    .cardMapDistribution {
+        order: 4;
+    }
+
+    .cardHunterTopRoles {
+        order: 5;
+    }
+
+    .cardSurvivorTopRoles {
+        order: 6;
     }
 }
 
@@ -396,12 +452,62 @@
         min-width: 0;
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
+    .chartGrid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 720px) {
+    .page {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
     .metricGrid,
+    .chartGrid {
+        display: contents;
+    }
+
     .heroStats {
         grid-template-columns: 1fr;
+    }
+
+    .cardTotalMatches {
+        order: 1;
+    }
+
+    .cardModeDistribution {
+        order: 2;
+    }
+
+    .cardMapDistribution {
+        order: 3;
+    }
+
+    .cardHunterAverageKill {
+        order: 4;
+    }
+
+    .cardSurvivorEscapeRate {
+        order: 5;
+    }
+
+    .cardHunterResults {
+        order: 6;
+    }
+
+    .cardHunterTopRoles {
+        order: 7;
+    }
+
+    .cardSurvivorResults {
+        order: 8;
+    }
+
+    .cardSurvivorTopRoles {
+        order: 9;
     }
 
     .panelHeader {
@@ -423,15 +529,15 @@
 
 .pieContainer {
     display: flex;
-    align-items: center;
-    gap: 24px;
-    margin-top: 10px;
+    align-items: flex-start;
+    gap: 14px;
+    margin-top: 6px;
 }
 
 .pieVisual {
     position: relative;
-    width: 140px;
-    height: 140px;
+    width: 112px;
+    height: 112px;
     flex-shrink: 0;
 }
 
@@ -455,7 +561,7 @@
 .pieLegend {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
     flex: 1;
 }
 
@@ -476,7 +582,7 @@
     display: flex;
     flex-direction: column;
     color: #edf4ff;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
 }
 
@@ -496,7 +602,7 @@
 }
 
 .pieCenterText strong {
-    font-size: 20px;
+    font-size: 17px;
     color: #f2f7ff;
     line-height: 1.1;
     font-family: "Space Grotesk", "Noto Sans TC", sans-serif;
@@ -507,40 +613,44 @@
     color: #8b99ad;
 }
 
-.topCharWrap {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-top: 10px;
+.roleThemeHunter {
+    background:
+        radial-gradient(circle at top right, rgba(167, 52, 52, 0.18), transparent 42%),
+        linear-gradient(180deg, rgba(34, 16, 18, 0.96), rgba(24, 11, 13, 0.98));
+    border-color: rgba(181, 88, 88, 0.3);
 }
 
-.topCharSection {
-    background: rgba(12, 16, 22, 0.4);
-    border: 1px solid rgba(103, 128, 160, 0.1);
-    border-radius: 12px;
-    padding: 12px;
+.roleThemeSurvivor {
+    background:
+        radial-gradient(circle at top right, rgba(69, 137, 214, 0.2), transparent 42%),
+        linear-gradient(180deg, rgba(14, 24, 39, 0.96), rgba(9, 16, 29, 0.98));
+    border-color: rgba(84, 138, 212, 0.3);
 }
 
-.topCharSection h4 {
-    margin: 0 0 10px;
-    font-size: 13px;
-    color: #aebbd0;
+.roleThemeHunter .panelKicker {
+    color: #cda3a3;
+}
+
+.roleThemeSurvivor .panelKicker {
+    color: #9fc3e8;
 }
 
 .topCharList {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
+    margin-top: 6px;
 }
 
 .topCharRow {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 12px;
-    background: rgba(22, 28, 38, 0.6);
+    padding: 6px 10px;
+    background: rgba(10, 15, 24, 0.42);
+    border: 1px solid rgba(126, 145, 172, 0.14);
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .topCharRow span {
@@ -548,7 +658,25 @@
 }
 
 .topCharRow strong {
-    color: #69b7ff;
+    color: #f7f3e8;
     font-family: "Space Grotesk", "Noto Sans TC", sans-serif;
+}
+
+.roleThemeHunter .topCharRow {
+    background: rgba(40, 18, 20, 0.44);
+    border-color: rgba(171, 88, 88, 0.26);
+}
+
+.roleThemeSurvivor .topCharRow {
+    background: rgba(15, 29, 46, 0.46);
+    border-color: rgba(89, 136, 193, 0.26);
+}
+
+.roleThemeHunter .topCharRow strong {
+    color: #ffb7ac;
+}
+
+.roleThemeSurvivor .topCharRow strong {
+    color: #9fd0ff;
 }
 

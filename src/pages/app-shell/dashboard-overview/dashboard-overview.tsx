@@ -224,24 +224,24 @@ export default function DashboardOverviewPage() {
             )}
 
             <section className={styles.metricGrid}>
-                <article className={styles.metricCard}>
+                <article className={`${styles.metricCard} ${styles.cardTotalMatches}`}>
                     <p className={styles.label}>總場次</p>
                     <p className={styles.value}>{pageLoading && matches === null ? "載入中..." : totalMatches.toLocaleString("zh-TW")}</p>
                 </article>
 
-                <article className={styles.metricCard}>
+                <article className={`${styles.metricCard} ${styles.metricCardHunter} ${styles.cardHunterAverageKill}`}>
                     <p className={styles.label}>監管平均淘汰數</p>
                     <p className={styles.value}>{hunterAverageKills === null ? "--" : hunterAverageKills.toFixed(1)}</p>
                 </article>
 
-                <article className={styles.metricCard}>
+                <article className={`${styles.metricCard} ${styles.metricCardSurvivor} ${styles.cardSurvivorEscapeRate}`}>
                     <p className={styles.label}>求生逃脫率</p>
                     <p className={styles.value}>{survivorEscapeRate === null ? "--" : `${survivorEscapeRate.toFixed(1)}%`}</p>
                 </article>
             </section>
 
             <section className={styles.chartGrid}>
-                <article className={styles.panel}>
+                <article className={`${styles.panel} ${styles.cardModeDistribution}`}>
                     <div className={styles.panelHeader}>
                         <div>
                             <p className={styles.panelKicker}>對戰概況</p>
@@ -274,7 +274,7 @@ export default function DashboardOverviewPage() {
 
                             {topMatchType && (
                                 <div className={styles.modeSummary}>
-                                    <span>主力模式</span>
+                                    <span>最常遊玩的模式</span>
                                     <strong>
                                         {topMatchType.label} · {topMatchType.value} 場
                                     </strong>
@@ -284,7 +284,7 @@ export default function DashboardOverviewPage() {
                     )}
                 </article>
 
-                <article className={styles.panel}>
+                <article className={`${styles.panel} ${styles.cardMapDistribution}`}>
                     <div className={styles.panelHeader}>
                         <div>
                             <p className={styles.panelKicker}>對局分析</p>
@@ -302,48 +302,49 @@ export default function DashboardOverviewPage() {
                     )}
                 </article>
 
-                <article className={styles.panel}>
+                <article className={`${styles.panel} ${styles.roleThemeHunter} ${styles.cardHunterTopRoles}`}>
                     <div className={styles.panelHeader}>
                         <div>
                             <p className={styles.panelKicker}>出戰頻率</p>
-                            <h3>常用角色 (前三名)</h3>
+                            <h3>常用監管角色 (前三名)</h3>
                         </div>
                     </div>
-                    <div className={styles.topCharWrap}>
-                        <div className={styles.topCharSection}>
-                            <h4>監管陣營</h4>
-                            {topHunters.length > 0 ? (
-                                <div className={styles.topCharList}>
-                                    {topHunters.map((h) => (
-                                        <div key={h.pid} className={styles.topCharRow}>
-                                            <span>{formatCharacter(h.pid)}</span>
-                                            <strong>{h.count} 場</strong>
-                                        </div>
-                                    ))}
+                    {topHunters.length > 0 ? (
+                        <div className={styles.topCharList}>
+                            {topHunters.map((h) => (
+                                <div key={h.pid} className={styles.topCharRow}>
+                                    <span>{formatCharacter(h.pid)}</span>
+                                    <strong>{h.count} 場</strong>
                                 </div>
-                            ) : (
-                                <p className={styles.hint} style={{ margin: 0 }}>無監管紀錄</p>
-                            )}
+                            ))}
                         </div>
-                        <div className={styles.topCharSection}>
-                            <h4>求生陣營</h4>
-                            {topSurvivors.length > 0 ? (
-                                <div className={styles.topCharList}>
-                                    {topSurvivors.map((s) => (
-                                        <div key={s.pid} className={styles.topCharRow}>
-                                            <span>{formatCharacter(s.pid)}</span>
-                                            <strong>{s.count} 場</strong>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className={styles.hint} style={{ margin: 0 }}>無求生紀錄</p>
-                            )}
-                        </div>
-                    </div>
+                    ) : (
+                        <p className={styles.hint} style={{ margin: 0 }}>無監管紀錄</p>
+                    )}
                 </article>
 
-                <article className={styles.panel}>
+                <article className={`${styles.panel} ${styles.roleThemeSurvivor} ${styles.cardSurvivorTopRoles}`}>
+                    <div className={styles.panelHeader}>
+                        <div>
+                            <p className={styles.panelKicker}>出戰頻率</p>
+                            <h3>常用求生角色 (前三名)</h3>
+                        </div>
+                    </div>
+                    {topSurvivors.length > 0 ? (
+                        <div className={styles.topCharList}>
+                            {topSurvivors.map((s) => (
+                                <div key={s.pid} className={styles.topCharRow}>
+                                    <span>{formatCharacter(s.pid)}</span>
+                                    <strong>{s.count} 場</strong>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className={styles.hint} style={{ margin: 0 }}>無求生紀錄</p>
+                    )}
+                </article>
+
+                <article className={`${styles.panel} ${styles.roleThemeHunter} ${styles.cardHunterResults}`}>
                     <div className={styles.panelHeader}>
                         <div>
                             <p className={styles.panelKicker}>陣營總體</p>
@@ -353,9 +354,9 @@ export default function DashboardOverviewPage() {
                     {hunterResults.total > 0 ? (
                         <RenderPieChart
                             data={[
-                                { label: "勝場", value: hunterResults.win, color: "#66C2FF", sublabel: "(3-4殺)" },
-                                { label: "平局", value: hunterResults.tie, color: "#9CA4AB", sublabel: "(2殺)" },
-                                { label: "敗場", value: hunterResults.loss, color: "#FF7B7B", sublabel: "(0-1殺)" },
+                                { label: "勝利", value: hunterResults.win, color: "#ffdb84"},
+                                { label: "平局", value: hunterResults.tie, color: "#e0dfdd"},
+                                { label: "失敗", value: hunterResults.loss, color: "#ff8c7f"},
                             ].filter((d) => d.value > 0)}
                             centerTitle={hunterResults.total === 0 ? "0%" : `${((hunterResults.win / hunterResults.total) * 100).toFixed(1)}%`}
                             centerSub={`共 ${hunterResults.total} 場`}
@@ -365,7 +366,7 @@ export default function DashboardOverviewPage() {
                     )}
                 </article>
 
-                <article className={styles.panel}>
+                <article className={`${styles.panel} ${styles.roleThemeSurvivor} ${styles.cardSurvivorResults}`}>
                     <div className={styles.panelHeader}>
                         <div>
                             <p className={styles.panelKicker}>陣營總體</p>
@@ -375,9 +376,9 @@ export default function DashboardOverviewPage() {
                     {survivorResults.total > 0 ? (
                         <RenderPieChart
                             data={[
-                                { label: "勝場", value: survivorResults.win, color: "#66C2FF", sublabel: "(遇0-1跑)" },
-                                { label: "平局", value: survivorResults.tie, color: "#9CA4AB", sublabel: "(遇2跑)" },
-                                { label: "敗場", value: survivorResults.loss, color: "#FF7B7B", sublabel: "(遇3-4殺)" },
+                                { label: "勝利", value: survivorResults.win, color: "#ffdb84"},
+                                { label: "平局", value: survivorResults.tie, color: "#e0dfdd"},
+                                { label: "失敗", value: survivorResults.loss, color: "#ff8c7f"},
                             ].filter((d) => d.value > 0)}
                             centerTitle={survivorResults.total === 0 ? "0%" : `${((survivorResults.win / survivorResults.total) * 100).toFixed(1)}%`}
                             centerSub={`共 ${survivorResults.total} 場`}
