@@ -124,11 +124,116 @@ function pickTopEntry(entries: Record<string, number>): { label: string; value: 
     return { label, value };
 }
 
+type CardKey = 'totalMatches' | 'hunterAvgKill' | 'survivorEscapeRate' | 'modeDistribution' | 'mapDistribution' | 'hunterTopRoles' | 'survivorTopRoles' | 'hunterResults' | 'survivorResults';
+
+const CARD_DEFINITIONS: Record<CardKey, { label: string; category: 'metric' | 'panel' }> = {
+    totalMatches: { label: '總場次', category: 'metric' },
+    hunterAvgKill: { label: '監管平均淘汰數', category: 'metric' },
+    survivorEscapeRate: { label: '求生逃脫率', category: 'metric' },
+    modeDistribution: { label: '對戰模式分布', category: 'panel' },
+    mapDistribution: { label: '地圖出現比例', category: 'panel' },
+    hunterTopRoles: { label: '常用監管角色', category: 'panel' },
+    survivorTopRoles: { label: '常用求生角色', category: 'panel' },
+    hunterResults: { label: '監管對局結果', category: 'panel' },
+    survivorResults: { label: '求生對局結果', category: 'panel' },
+};
+
 export default function DashboardOverviewPage() {
     const accessToken = useUserAuthStore((state) => state.accessToken);
     const [matches, setMatches] = useState<MatchListResponse | null>(null);
     const [matchError, setMatchError] = useState<string | null>(null);
     const [pageLoading, setPageLoading] = useState(true);
+    const [visibleCards, setVisibleCards] = useState<Set<CardKey>>(
+        new Set(Object.keys(CARD_DEFINITIONS) as CardKey[])
+    );
+    const [showCardSelector, setShowCardSelector] = useState(false);
+    const [cardOrder, setCardOrder] = useState<CardKey[]>(
+        Object.keys(CARD_DEFINITIONS) as CardKey[]
+    );
+    const [draggedCard, setDraggedCard] = useState<CardKey | null>(null);
+    const [previewOrder, setPreviewOrder] = useState<CardKey[] | null>(null);
+
+    useEffect(() => {
+        const savedVisible = localStorage.getItem('dashboardVisibleCards');
+        if (savedVisible) {
+            try {
+                const parsed = JSON.parse(savedVisible) as CardKey[];
+                setVisibleCards(new Set(parsed));
+            } catch {
+                // Fallback to default if parsing fails
+            }
+        }
+
+        const savedOrder = localStorage.getItem('dashboardCardOrder');
+        if (savedOrder) {
+            try {
+                const parsed = JSON.parse(savedOrder) as CardKey[];
+                setCardOrder(parsed);
+            } catch {
+                // Fallback to default if parsing fails
+            }
+        }
+    }, []);
+
+    const handleCardToggle = (cardKey: CardKey) => {
+        setVisibleCards((prev) => {
+            const next = new Set(prev);
+            if (next.has(cardKey)) {
+                next.delete(cardKey);
+            } else {
+                next.add(cardKey);
+            }
+            localStorage.setItem('dashboardVisibleCards', JSON.stringify(Array.from(next)));
+            return next;
+        });
+    };
+
+    const moveCard = (order: CardKey[], dragKey: CardKey, targetKey: CardKey): CardKey[] => {
+        if (dragKey === targetKey) return order;
+
+        const draggedIndex = order.indexOf(dragKey);
+        const targetIndex = order.indexOf(targetKey);
+        if (draggedIndex < 0 || targetIndex < 0) return order;
+
+        const nextOrder = [...order];
+        nextOrder.splice(draggedIndex, 1);
+        nextOrder.splice(targetIndex, 0, dragKey);
+        return nextOrder;
+    };
+
+    const handleCardDragStart = (cardKey: CardKey) => {
+        setDraggedCard(cardKey);
+        setPreviewOrder(cardOrder);
+    };
+
+    const handleCardDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+    };
+
+    const handleCardDragEnter = (targetCard: CardKey) => {
+        if (!draggedCard || draggedCard === targetCard) return;
+        setPreviewOrder((prev) => moveCard(prev ?? cardOrder, draggedCard, targetCard));
+    };
+
+    const handleCardDragEnd = () => {
+        setDraggedCard(null);
+        setPreviewOrder(null);
+    };
+
+    const handleCardDrop = (targetCard: CardKey) => {
+        if (!draggedCard) {
+            setDraggedCard(null);
+            setPreviewOrder(null);
+            return;
+        }
+
+        const newOrder = previewOrder ?? moveCard(cardOrder, draggedCard, targetCard);
+
+        setCardOrder(newOrder);
+        localStorage.setItem('dashboardCardOrder', JSON.stringify(newOrder));
+        setDraggedCard(null);
+        setPreviewOrder(null);
+    };
 
     useEffect(() => {
         let active = true;
@@ -214,6 +319,17 @@ export default function DashboardOverviewPage() {
         return (escapedCount / totalSlots) * 100;
     }, [recentMatches]);
 
+    const effectiveOrder = previewOrder ?? cardOrder;
+
+    // Organize cards by category in order
+    const orderedMetricCards = useMemo(() => {
+        return effectiveOrder.filter((key) => CARD_DEFINITIONS[key].category === 'metric');
+    }, [effectiveOrder]);
+
+    const orderedPanelCards = useMemo(() => {
+        return effectiveOrder.filter((key) => CARD_DEFINITIONS[key].category === 'panel');
+    }, [effectiveOrder]);
+
     return (
         <div className={styles.page}>
 
@@ -223,171 +339,394 @@ export default function DashboardOverviewPage() {
                 </section>
             )}
 
-            <section className={styles.metricGrid}>
-                <article className={`${styles.metricCard} ${styles.cardTotalMatches}`}>
-                    <p className={styles.label}>總場次</p>
-                    <p className={styles.value}>{pageLoading && matches === null ? "載入中..." : totalMatches.toLocaleString("zh-TW")}</p>
-                </article>
+            <div className={styles.dashboardHeader}>
+                <button
+                    type="button"
+                    className={styles.cardSelectorToggle}
+                    onClick={() => setShowCardSelector(!showCardSelector)}
+                >
+                    ⚙️ 選擇卡片
+                </button>
+            </div>
 
-                <article className={`${styles.metricCard} ${styles.metricCardHunter} ${styles.cardHunterAverageKill}`}>
-                    <p className={styles.label}>監管平均淘汰數</p>
-                    <p className={styles.value}>{hunterAverageKills === null ? "--" : hunterAverageKills.toFixed(1)}</p>
-                </article>
-
-                <article className={`${styles.metricCard} ${styles.metricCardSurvivor} ${styles.cardSurvivorEscapeRate}`}>
-                    <p className={styles.label}>求生逃脫率</p>
-                    <p className={styles.value}>{survivorEscapeRate === null ? "--" : `${survivorEscapeRate.toFixed(1)}%`}</p>
-                </article>
-            </section>
-
-            <section className={styles.chartGrid}>
-                <article className={`${styles.panel} ${styles.cardModeDistribution}`}>
-                    <div className={styles.panelHeader}>
-                        <div>
-                            <p className={styles.panelKicker}>對戰概況</p>
-                            <h3>對戰模式分布</h3>
+            {showCardSelector && (
+                <div className={styles.cardSelectorOverlay} onClick={() => setShowCardSelector(false)}>
+                    <section className={styles.cardSelectorPanel} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles.cardSelectorHeader}>
+                            <h3>選擇要顯示的卡片 (可拖拽排序)</h3>
+                            <button
+                                type="button"
+                                className={styles.cardSelectorClose}
+                                onClick={() => setShowCardSelector(false)}
+                                aria-label="關閉卡片選擇視窗"
+                            >
+                                ×
+                            </button>
                         </div>
-                        <p className={styles.panelMeta}>最近 {loadedMatchCount} 場</p>
-                    </div>
 
-                    {recentMatches.length === 0 ? (
-                        <div className={styles.stateBox}>目前沒有可視化資料，請先載入對戰紀錄。</div>
-                    ) : (
-                        <div className={styles.modeChart} aria-label="對戰模式分布圖表">
-                            {Object.entries(matchCounts)
-                                .sort((left, right) => right[1] - left[1])
-                                .map(([label, count]) => {
-                                    const ratio = loadedMatchCount === 0 ? 0 : count / loadedMatchCount;
-                                    return (
-                                        <div key={label} className={styles.modeBar}>
-                                            <div className={styles.modeBarTop}>
-                                                <span>{label}</span>
-                                                <strong>{count}</strong>
+                        <div className={styles.cardSelectorContent}>
+                            <div className={styles.selectorSection}>
+                                <p className={styles.selectorSectionTitle}>數值顯示卡片</p>
+                                <div className={styles.cardSelectorGrid}>
+                                    {orderedMetricCards.map((key) => {
+                                        const def = CARD_DEFINITIONS[key];
+                                        return (
+                                            <div
+                                                key={key}
+                                                draggable
+                                                onDragStart={() => handleCardDragStart(key)}
+                                                onDragOver={handleCardDragOver}
+                                                onDragEnter={() => handleCardDragEnter(key)}
+                                                onDrop={() => handleCardDrop(key)}
+                                                onDragEnd={handleCardDragEnd}
+                                                className={`${styles.cardItem} ${draggedCard === key ? styles.cardItemDragging : ''}`}
+                                            >
+                                                <label className={styles.cardCheckbox}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={visibleCards.has(key as CardKey)}
+                                                        onChange={() => handleCardToggle(key as CardKey)}
+                                                    />
+                                                    <span>{def.label}</span>
+                                                </label>
+                                                <span className={styles.dragHandle}>⋮⋮</span>
                                             </div>
-                                            <div className={styles.modeBarTrack}>
-                                                <span className={styles.modeBarFill} style={{ width: `${Math.max(ratio * 100, 6)}%` }} />
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            <div className={styles.selectorSection}>
+                                <p className={styles.selectorSectionTitle}>數據顯示卡片</p>
+                                <div className={styles.cardSelectorGrid}>
+                                    {orderedPanelCards.map((key) => {
+                                        const def = CARD_DEFINITIONS[key];
+                                        return (
+                                            <div
+                                                key={key}
+                                                draggable
+                                                onDragStart={() => handleCardDragStart(key)}
+                                                onDragOver={handleCardDragOver}
+                                                onDragEnter={() => handleCardDragEnter(key)}
+                                                onDrop={() => handleCardDrop(key)}
+                                                onDragEnd={handleCardDragEnd}
+                                                className={`${styles.cardItem} ${draggedCard === key ? styles.cardItemDragging : ''}`}
+                                            >
+                                                <label className={styles.cardCheckbox}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={visibleCards.has(key as CardKey)}
+                                                        onChange={() => handleCardToggle(key as CardKey)}
+                                                    />
+                                                    <span>{def.label}</span>
+                                                </label>
+                                                <span className={styles.dragHandle}>⋮⋮</span>
                                             </div>
-                                            <small>{Math.round(ratio * 100)}%</small>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            )}
+
+            {orderedMetricCards.some((key) => visibleCards.has(key)) && (
+                <section className={styles.metricGrid}>
+                    {orderedMetricCards.map((key) => {
+                        if (!visibleCards.has(key)) return null;
+
+                        if (key === 'totalMatches') {
+                            return (
+                                <article
+                                    key={key}
+                                    draggable
+                                    onDragStart={() => handleCardDragStart(key)}
+                                    onDragOver={handleCardDragOver}
+                                    onDragEnter={() => handleCardDragEnter(key)}
+                                    onDrop={() => handleCardDrop(key)}
+                                    onDragEnd={handleCardDragEnd}
+                                    className={`${styles.metricCard} ${styles.cardTotalMatches} ${styles.draggableCard} ${draggedCard === key ? styles.draggableCardDragging : ''}`}
+                                >
+                                    <p className={styles.label}>總場次</p>
+                                    <p className={styles.value}>{pageLoading && matches === null ? "載入中..." : totalMatches.toLocaleString("zh-TW")}</p>
+                                </article>
+                            );
+                        }
+
+                        if (key === 'hunterAvgKill') {
+                            return (
+                                <article
+                                    key={key}
+                                    draggable
+                                    onDragStart={() => handleCardDragStart(key)}
+                                    onDragOver={handleCardDragOver}
+                                    onDragEnter={() => handleCardDragEnter(key)}
+                                    onDrop={() => handleCardDrop(key)}
+                                    onDragEnd={handleCardDragEnd}
+                                    className={`${styles.metricCard} ${styles.metricCardHunter} ${styles.cardHunterAverageKill} ${styles.draggableCard} ${draggedCard === key ? styles.draggableCardDragging : ''}`}
+                                >
+                                    <p className={styles.label}>監管平均淘汰數</p>
+                                    <p className={styles.value}>{hunterAverageKills === null ? "--" : hunterAverageKills.toFixed(1)}</p>
+                                </article>
+                            );
+                        }
+
+                        if (key === 'survivorEscapeRate') {
+                            return (
+                                <article
+                                    key={key}
+                                    draggable
+                                    onDragStart={() => handleCardDragStart(key)}
+                                    onDragOver={handleCardDragOver}
+                                    onDragEnter={() => handleCardDragEnter(key)}
+                                    onDrop={() => handleCardDrop(key)}
+                                    onDragEnd={handleCardDragEnd}
+                                    className={`${styles.metricCard} ${styles.metricCardSurvivor} ${styles.cardSurvivorEscapeRate} ${styles.draggableCard} ${draggedCard === key ? styles.draggableCardDragging : ''}`}
+                                >
+                                    <p className={styles.label}>求生逃脫率</p>
+                                    <p className={styles.value}>{survivorEscapeRate === null ? "--" : `${survivorEscapeRate.toFixed(1)}%`}</p>
+                                </article>
+                            );
+                        }
+
+                        return null;
+                    })}
+                </section>
+            )}
+
+            {orderedPanelCards.some((key) => visibleCards.has(key)) && (
+                <section className={styles.chartGrid}>
+                    {orderedPanelCards.map((key) => {
+                        if (!visibleCards.has(key)) return null;
+
+                        if (key === 'modeDistribution') {
+                            return (
+                                <article
+                                    key={key}
+                                    draggable
+                                    onDragStart={() => handleCardDragStart(key)}
+                                    onDragOver={handleCardDragOver}
+                                    onDragEnter={() => handleCardDragEnter(key)}
+                                    onDrop={() => handleCardDrop(key)}
+                                    onDragEnd={handleCardDragEnd}
+                                    className={`${styles.panel} ${styles.cardModeDistribution} ${styles.draggableCard} ${draggedCard === key ? styles.draggableCardDragging : ''}`}
+                                >
+                                    <div className={styles.panelHeader}>
+                                        <div>
+                                            <p className={styles.panelKicker}>對戰概況</p>
+                                            <h3>對戰模式分布</h3>
                                         </div>
-                                    );
-                                })}
+                                        <p className={styles.panelMeta}>最近 {loadedMatchCount} 場</p>
+                                    </div>
+                                    {recentMatches.length === 0 ? (
+                                        <div className={styles.stateBox}>目前沒有可視化資料，請先載入對戰紀錄。</div>
+                                    ) : (
+                                        <div className={styles.modeChart} aria-label="對戰模式分布圖表">
+                                            {Object.entries(matchCounts)
+                                                .sort((left, right) => right[1] - left[1])
+                                                .map(([label, count]) => {
+                                                    const ratio = loadedMatchCount === 0 ? 0 : count / loadedMatchCount;
+                                                    return (
+                                                        <div key={label} className={styles.modeBar}>
+                                                            <div className={styles.modeBarTop}>
+                                                                <span>{label}</span>
+                                                                <strong>{count}</strong>
+                                                            </div>
+                                                            <div className={styles.modeBarTrack}>
+                                                                <span className={styles.modeBarFill} style={{ width: `${Math.max(ratio * 100, 6)}%` }} />
+                                                            </div>
+                                                            <small>{Math.round(ratio * 100)}%</small>
+                                                        </div>
+                                                    );
+                                                })}
+                                            {topMatchType && (
+                                                <div className={styles.modeSummary}>
+                                                    <span>最常遊玩的模式</span>
+                                                    <strong>
+                                                        {topMatchType.label} · {topMatchType.value} 場
+                                                    </strong>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </article>
+                            );
+                        }
 
-                            {topMatchType && (
-                                <div className={styles.modeSummary}>
-                                    <span>最常遊玩的模式</span>
-                                    <strong>
-                                        {topMatchType.label} · {topMatchType.value} 場
-                                    </strong>
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </article>
+                        if (key === 'mapDistribution') {
+                            return (
+                                <article
+                                    key={key}
+                                    draggable
+                                    onDragStart={() => handleCardDragStart(key)}
+                                    onDragOver={handleCardDragOver}
+                                    onDragEnter={() => handleCardDragEnter(key)}
+                                    onDrop={() => handleCardDrop(key)}
+                                    onDragEnd={handleCardDragEnd}
+                                    className={`${styles.panel} ${styles.cardMapDistribution} ${styles.draggableCard} ${draggedCard === key ? styles.draggableCardDragging : ''}`}
+                                >
+                                    <div className={styles.panelHeader}>
+                                        <div>
+                                            <p className={styles.panelKicker}>對局分析</p>
+                                            <h3>地圖出現比例</h3>
+                                        </div>
+                                    </div>
+                                    {mapCounts.length > 0 ? (
+                                        <RenderPieChart
+                                            data={mapCounts}
+                                            centerTitle="地圖"
+                                            centerSub={`${mapCounts.reduce((s, i) => s + i.value, 0)} 場`}
+                                        />
+                                    ) : (
+                                        <div className={styles.stateBox}>無地圖資料</div>
+                                    )}
+                                </article>
+                            );
+                        }
 
-                <article className={`${styles.panel} ${styles.cardMapDistribution}`}>
-                    <div className={styles.panelHeader}>
-                        <div>
-                            <p className={styles.panelKicker}>對局分析</p>
-                            <h3>地圖出現比例</h3>
-                        </div>
-                    </div>
-                    {mapCounts.length > 0 ? (
-                        <RenderPieChart
-                            data={mapCounts}
-                            centerTitle="地圖"
-                            centerSub={`${mapCounts.reduce((s, i) => s + i.value, 0)} 場`}
-                        />
-                    ) : (
-                        <div className={styles.stateBox}>無地圖資料</div>
-                    )}
-                </article>
+                        if (key === 'hunterTopRoles') {
+                            return (
+                                <article
+                                    key={key}
+                                    draggable
+                                    onDragStart={() => handleCardDragStart(key)}
+                                    onDragOver={handleCardDragOver}
+                                    onDragEnter={() => handleCardDragEnter(key)}
+                                    onDrop={() => handleCardDrop(key)}
+                                    onDragEnd={handleCardDragEnd}
+                                    className={`${styles.panel} ${styles.roleThemeHunter} ${styles.cardHunterTopRoles} ${styles.draggableCard} ${draggedCard === key ? styles.draggableCardDragging : ''}`}
+                                >
+                                    <div className={styles.panelHeader}>
+                                        <div>
+                                            <p className={styles.panelKicker}>出戰頻率</p>
+                                            <h3>常用監管角色 (前三名)</h3>
+                                        </div>
+                                    </div>
+                                    {topHunters.length > 0 ? (
+                                        <div className={styles.topCharList}>
+                                            {topHunters.map((h) => (
+                                                <div key={h.pid} className={styles.topCharRow}>
+                                                    <span>{formatCharacter(h.pid)}</span>
+                                                    <strong>{h.count} 場</strong>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className={styles.hint} style={{ margin: 0 }}>無監管紀錄</p>
+                                    )}
+                                </article>
+                            );
+                        }
 
-                <article className={`${styles.panel} ${styles.roleThemeHunter} ${styles.cardHunterTopRoles}`}>
-                    <div className={styles.panelHeader}>
-                        <div>
-                            <p className={styles.panelKicker}>出戰頻率</p>
-                            <h3>常用監管角色 (前三名)</h3>
-                        </div>
-                    </div>
-                    {topHunters.length > 0 ? (
-                        <div className={styles.topCharList}>
-                            {topHunters.map((h) => (
-                                <div key={h.pid} className={styles.topCharRow}>
-                                    <span>{formatCharacter(h.pid)}</span>
-                                    <strong>{h.count} 場</strong>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className={styles.hint} style={{ margin: 0 }}>無監管紀錄</p>
-                    )}
-                </article>
+                        if (key === 'survivorTopRoles') {
+                            return (
+                                <article
+                                    key={key}
+                                    draggable
+                                    onDragStart={() => handleCardDragStart(key)}
+                                    onDragOver={handleCardDragOver}
+                                    onDragEnter={() => handleCardDragEnter(key)}
+                                    onDrop={() => handleCardDrop(key)}
+                                    onDragEnd={handleCardDragEnd}
+                                    className={`${styles.panel} ${styles.roleThemeSurvivor} ${styles.cardSurvivorTopRoles} ${styles.draggableCard} ${draggedCard === key ? styles.draggableCardDragging : ''}`}
+                                >
+                                    <div className={styles.panelHeader}>
+                                        <div>
+                                            <p className={styles.panelKicker}>出戰頻率</p>
+                                            <h3>常用求生角色 (前三名)</h3>
+                                        </div>
+                                    </div>
+                                    {topSurvivors.length > 0 ? (
+                                        <div className={styles.topCharList}>
+                                            {topSurvivors.map((s) => (
+                                                <div key={s.pid} className={styles.topCharRow}>
+                                                    <span>{formatCharacter(s.pid)}</span>
+                                                    <strong>{s.count} 場</strong>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className={styles.hint} style={{ margin: 0 }}>無求生紀錄</p>
+                                    )}
+                                </article>
+                            );
+                        }
 
-                <article className={`${styles.panel} ${styles.roleThemeSurvivor} ${styles.cardSurvivorTopRoles}`}>
-                    <div className={styles.panelHeader}>
-                        <div>
-                            <p className={styles.panelKicker}>出戰頻率</p>
-                            <h3>常用求生角色 (前三名)</h3>
-                        </div>
-                    </div>
-                    {topSurvivors.length > 0 ? (
-                        <div className={styles.topCharList}>
-                            {topSurvivors.map((s) => (
-                                <div key={s.pid} className={styles.topCharRow}>
-                                    <span>{formatCharacter(s.pid)}</span>
-                                    <strong>{s.count} 場</strong>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className={styles.hint} style={{ margin: 0 }}>無求生紀錄</p>
-                    )}
-                </article>
+                        if (key === 'hunterResults') {
+                            return (
+                                <article
+                                    key={key}
+                                    draggable
+                                    onDragStart={() => handleCardDragStart(key)}
+                                    onDragOver={handleCardDragOver}
+                                    onDragEnter={() => handleCardDragEnter(key)}
+                                    onDrop={() => handleCardDrop(key)}
+                                    onDragEnd={handleCardDragEnd}
+                                    className={`${styles.panel} ${styles.roleThemeHunter} ${styles.cardHunterResults} ${styles.draggableCard} ${draggedCard === key ? styles.draggableCardDragging : ''}`}
+                                >
+                                    <div className={styles.panelHeader}>
+                                        <div>
+                                            <p className={styles.panelKicker}>陣營總體</p>
+                                            <h3>監管對局結果</h3>
+                                        </div>
+                                    </div>
+                                    {hunterResults.total > 0 ? (
+                                        <RenderPieChart
+                                            data={[
+                                                { label: "勝利", value: hunterResults.win, color: "#ffdb84"},
+                                                { label: "平局", value: hunterResults.tie, color: "#e0dfdd"},
+                                                { label: "失敗", value: hunterResults.loss, color: "#ff8c7f"},
+                                            ].filter((d) => d.value > 0)}
+                                            centerTitle={hunterResults.total === 0 ? "0%" : `${((hunterResults.win / hunterResults.total) * 100).toFixed(1)}%`}
+                                            centerSub={`共 ${hunterResults.total} 場`}
+                                        />
+                                    ) : (
+                                        <div className={styles.stateBox}>無監管排位/匹配紀錄</div>
+                                    )}
+                                </article>
+                            );
+                        }
 
-                <article className={`${styles.panel} ${styles.roleThemeHunter} ${styles.cardHunterResults}`}>
-                    <div className={styles.panelHeader}>
-                        <div>
-                            <p className={styles.panelKicker}>陣營總體</p>
-                            <h3>監管對局結果</h3>
-                        </div>
-                    </div>
-                    {hunterResults.total > 0 ? (
-                        <RenderPieChart
-                            data={[
-                                { label: "勝利", value: hunterResults.win, color: "#ffdb84"},
-                                { label: "平局", value: hunterResults.tie, color: "#e0dfdd"},
-                                { label: "失敗", value: hunterResults.loss, color: "#ff8c7f"},
-                            ].filter((d) => d.value > 0)}
-                            centerTitle={hunterResults.total === 0 ? "0%" : `${((hunterResults.win / hunterResults.total) * 100).toFixed(1)}%`}
-                            centerSub={`共 ${hunterResults.total} 場`}
-                        />
-                    ) : (
-                        <div className={styles.stateBox}>無監管排位/匹配紀錄</div>
-                    )}
-                </article>
+                        if (key === 'survivorResults') {
+                            return (
+                                <article
+                                    key={key}
+                                    draggable
+                                    onDragStart={() => handleCardDragStart(key)}
+                                    onDragOver={handleCardDragOver}
+                                    onDragEnter={() => handleCardDragEnter(key)}
+                                    onDrop={() => handleCardDrop(key)}
+                                    onDragEnd={handleCardDragEnd}
+                                    className={`${styles.panel} ${styles.roleThemeSurvivor} ${styles.cardSurvivorResults} ${styles.draggableCard} ${draggedCard === key ? styles.draggableCardDragging : ''}`}
+                                >
+                                    <div className={styles.panelHeader}>
+                                        <div>
+                                            <p className={styles.panelKicker}>陣營總體</p>
+                                            <h3>求生對局結果</h3>
+                                        </div>
+                                    </div>
+                                    {survivorResults.total > 0 ? (
+                                        <RenderPieChart
+                                            data={[
+                                                { label: "勝利", value: survivorResults.win, color: "#ffdb84"},
+                                                { label: "平局", value: survivorResults.tie, color: "#e0dfdd"},
+                                                { label: "失敗", value: survivorResults.loss, color: "#ff8c7f"},
+                                            ].filter((d) => d.value > 0)}
+                                            centerTitle={survivorResults.total === 0 ? "0%" : `${((survivorResults.win / survivorResults.total) * 100).toFixed(1)}%`}
+                                            centerSub={`共 ${survivorResults.total} 場`}
+                                        />
+                                    ) : (
+                                        <div className={styles.stateBox}>無求生排位/匹配紀錄</div>
+                                    )}
+                                </article>
+                            );
+                        }
 
-                <article className={`${styles.panel} ${styles.roleThemeSurvivor} ${styles.cardSurvivorResults}`}>
-                    <div className={styles.panelHeader}>
-                        <div>
-                            <p className={styles.panelKicker}>陣營總體</p>
-                            <h3>求生對局結果</h3>
-                        </div>
-                    </div>
-                    {survivorResults.total > 0 ? (
-                        <RenderPieChart
-                            data={[
-                                { label: "勝利", value: survivorResults.win, color: "#ffdb84"},
-                                { label: "平局", value: survivorResults.tie, color: "#e0dfdd"},
-                                { label: "失敗", value: survivorResults.loss, color: "#ff8c7f"},
-                            ].filter((d) => d.value > 0)}
-                            centerTitle={survivorResults.total === 0 ? "0%" : `${((survivorResults.win / survivorResults.total) * 100).toFixed(1)}%`}
-                            centerSub={`共 ${survivorResults.total} 場`}
-                        />
-                    ) : (
-                        <div className={styles.stateBox}>無求生排位/匹配紀錄</div>
-                    )}
-                </article>
-            </section>
+                        return null;
+                    })}
+                </section>
+            )}
         </div>
     );
 }
