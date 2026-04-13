@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, Fragment } from "react";
+import { useEffect, useMemo, useRef, useState, Fragment } from "react";
 import { ApiError } from "../../../service/api";
 import { getMyMatches, getMatchDetail, type MatchItem, type MatchDetailResponse } from "../../../service/match.service";
 import styles from "./match-history.module.css";
@@ -83,6 +83,8 @@ export default function MatchHistoryPage() {
     const [roleFilter, setRoleFilter] = useState<string>("all");
     const [characterKeyword, setCharacterKeyword] = useState("");
     const [sortBy, setSortBy] = useState<"timeDesc" | "timeAsc" | "killDesc" | "killAsc">("timeDesc");
+    const tableWrapRef = useRef<HTMLDivElement | null>(null);
+    const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
 
     function toggleExpand(id: string) {
         if (expandedId === id) {
@@ -186,6 +188,23 @@ export default function MatchHistoryPage() {
             setExpandedId(null);
         }
     }, [expandedId, filteredAndSortedItems]);
+
+    useEffect(() => {
+        if (!expandedId) return;
+
+        const wrapEl = tableWrapRef.current;
+        const rowEl = rowRefs.current[expandedId];
+        if (!wrapEl || !rowEl) return;
+
+        const headerEl = wrapEl.querySelector("thead") as HTMLElement | null;
+        const stickyHeaderHeight = headerEl?.offsetHeight ?? 0;
+        const targetTop = rowEl.offsetTop - stickyHeaderHeight;
+
+        wrapEl.scrollTo({
+            top: Math.max(0, targetTop),
+            behavior: "smooth",
+        });
+    }, [expandedId]);
 
     function goPrev() {
         if (!hasPrev) return;
@@ -304,7 +323,7 @@ export default function MatchHistoryPage() {
             )}
 
             {!loading && !error && filteredAndSortedItems.length > 0 && (
-                <div className={styles.tableWrap}>
+                <div ref={tableWrapRef} className={styles.tableWrap}>
                     <table className={styles.table}>
                         <thead>
                             <tr>
@@ -323,11 +342,7 @@ export default function MatchHistoryPage() {
                                         onClick={() => toggleExpand(match.id)}
                                         style={{ cursor: "pointer" }}
                                         ref={(el) => {
-                                            if (el && expandedId === match.id) {
-                                                requestAnimationFrame(() => {
-                                                    el.scrollIntoView({ behavior: "smooth", block: "start" });
-                                                });
-                                            }
+                                            rowRefs.current[match.id] = el;
                                         }}
                                     >
                                         <td>{formatDateTime(match.game_save_time ?? match.created_at)}</td>
