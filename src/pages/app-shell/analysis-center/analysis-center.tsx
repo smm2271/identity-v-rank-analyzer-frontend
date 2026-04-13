@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import dataDict from "../../../../data.json";
 import { ApiError } from "../../../service/api";
 import { getLadderScoreHistory, getLatestLadderScores, type LadderScoreItem } from "../../../service/match.service";
+import { getCharacterName, getGameMeta, getRoleTypeByPid } from "../../../service/meta.service";
 import styles from "./analysis-center.module.css";
 
 type AnalysisCard = {
@@ -20,12 +20,6 @@ type ScoreRow = {
     recordedAt: string;
     roleType: "hunter" | "survivor";
 };
-
-const HUNTER_PIDS = new Set<number>([
-    1, 2, 19, 30, 60, 63, 64, 66, 74, 80, 81, 84, 85, 86, 93, 95,
-    98, 101, 102, 105, 109, 112, 116, 117, 126, 127, 129, 133, 136,
-    140, 143, 150,
-]);
 
 const CHART_WIDTH = 620;
 const CHART_HEIGHT = 240;
@@ -89,13 +83,13 @@ export default function AnalysisCenterPage() {
         setScoresLoading(true);
         setScoresError(null);
 
-        getLatestLadderScores()
-            .then((response) => {
+        Promise.all([getGameMeta(), getLatestLadderScores()])
+            .then(([metaData, response]) => {
                 if (!active) return;
                 const rows = Object.values(response.latest_scores)
                     .map((item: LadderScoreItem) => {
-                        const characterName = (dataDict.character as Record<string, string>)[String(item.pid)] ?? `角色 ${item.pid}`;
-                        const roleType: "hunter" | "survivor" = HUNTER_PIDS.has(item.pid) ? "hunter" : "survivor";
+                        const characterName = getCharacterName(metaData, item.pid);
+                        const roleType = getRoleTypeByPid(metaData, item.pid);
                         return {
                             pid: item.pid,
                             name: characterName,

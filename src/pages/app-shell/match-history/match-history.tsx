@@ -5,6 +5,11 @@ import styles from "./match-history.module.css";
 
 import dataDict from "../../../../data.json";
 
+const characterLookup = {
+    ...((dataDict as any).character?.hunter ?? {}),
+    ...((dataDict as any).character?.survivor ?? {}),
+} as Record<string, string>;
+
 function formatDateTime(value: string | null): string {
     if (!value) return "-";
     const date = new Date(value);
@@ -31,7 +36,7 @@ function formatRole(utype: number | null): string {
 
 function formatCharacter(pid: number | null): string {
     if (pid === null) return "-";
-    return (dataDict.character as any)[String(pid)] ?? `角色 ${pid}`;
+    return characterLookup[String(pid)] ?? `角色 ${pid}`;
 }
 
 function formatMap(scene_id: number | null): string {
