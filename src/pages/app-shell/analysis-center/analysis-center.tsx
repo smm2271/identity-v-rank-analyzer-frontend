@@ -1,4 +1,8 @@
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import dataDict from "../../../../data.json";
+import { ApiError } from "../../../service/api";
+import { getLadderScoreHistory, getLatestLadderScores, type LadderScoreItem } from "../../../service/match.service";
 import styles from "./analysis-center.module.css";
 
 type AnalysisCard = {
@@ -8,6 +12,24 @@ type AnalysisCard = {
     chartPlan: string;
     queryValue: string;
 };
+
+type ScoreRow = {
+    pid: number;
+    name: string;
+    score: number;
+    recordedAt: string;
+    roleType: "hunter" | "survivor";
+};
+
+const HUNTER_PIDS = new Set<number>([
+    1, 2, 19, 30, 60, 63, 64, 66, 74, 80, 81, 84, 85, 86, 93, 95,
+    98, 101, 102, 105, 109, 112, 116, 117, 126, 127, 129, 133, 136,
+    140, 143, 150,
+]);
+
+const CHART_WIDTH = 620;
+const CHART_HEIGHT = 240;
+const CHART_PADDING = 24;
 
 const ANALYSIS_CARDS: AnalysisCard[] = [
     {
@@ -36,6 +58,280 @@ const ANALYSIS_CARDS: AnalysisCard[] = [
 export default function AnalysisCenterPage() {
     const [searchParams] = useSearchParams();
     const highlighted = searchParams.get("view");
+    const [scoresLoading, setScoresLoading] = useState(false);
+    const [scoresError, setScoresError] = useState<string | null>(null);
+    const [scoreRows, setScoreRows] = useState<ScoreRow[]>([]);
+    const [keyword, setKeyword] = useState("");
+    const [selectedRow, setSelectedRow] = useState<ScoreRow | null>(null);
+    const [historyLoading, setHistoryLoading] = useState(false);
+    const [historyError, setHistoryError] = useState<string | null>(null);
+    const [historyItems, setHistoryItems] = useState<LadderScoreItem[]>([]);
+
+    useEffect(() => {
+        if (highlighted !== "role-scores") {
+            return;
+        }
+
+        let active = true;
+        setScoresLoading(true);
+        setScoresError(null);
+
+        getLatestLadderScores()
+            .then((response) => {
+                if (!active) return;
+                const rows = Object.values(response.latest_scores)
+                    .map((item: LadderScoreItem) => {
+                        const characterName = (dataDict.character as Record<string, string>)[String(item.pid)] ?? `角色 ${item.pid}`;
+                        const roleType: "hunter" | "survivor" = HUNTER_PIDS.has(item.pid) ? "hunter" : "survivor";
+                        return {
+                            pid: item.pid,
+                            name: characterName,
+                            score: item.score,
+                            recordedAt: item.recorded_at,
+                            roleType,
+                        };
+                    })
+                    .sort((left, right) => right.score - left.score);
+                setScoreRows(rows);
+            })
+            .catch((error: unknown) => {
+                if (!active) return;
+                const message = error instanceof ApiError ? error.detail : "讀取角色認知分失敗";
+                setScoresError(message);
+            })
+            .finally(() => {
+                if (active) {
+                    setScoresLoading(false);
+                }
+            });
+
+        return () => {
+            active = false;
+        };
+    }, [highlighted]);
+
+    useEffect(() => {
+        if (!selectedRow) {
+            return;
+        }
+
+        let active = true;
+        setHistoryLoading(true);
+        setHistoryError(null);
+
+        getLadderScoreHistory(selectedRow.pid, 30)
+            .then((response) => {
+                if (!active) return;
+                const sorted = [...response.scores].sort(
+                    (left, right) => new Date(left.recorded_at).getTime() - new Date(right.recorded_at).getTime(),
+                );
+                setHistoryItems(sorted);
+            })
+            .catch((error: unknown) => {
+                if (!active) return;
+                const message = error instanceof ApiError ? error.detail : "讀取角色歷史分數失敗";
+                setHistoryError(message);
+            })
+            .finally(() => {
+                if (active) {
+                    setHistoryLoading(false);
+                }
+            });
+
+        return () => {
+            active = false;
+        };
+    }, [selectedRow]);
+
+    useEffect(() => {
+        function onKeyDown(event: KeyboardEvent) {
+            if (event.key === "Escape") {
+                setSelectedRow(null);
+            }
+        }
+
+        if (selectedRow) {
+            window.addEventListener("keydown", onKeyDown);
+        }
+
+        return () => {
+            window.removeEventListener("keydown", onKeyDown);
+        };
+    }, [selectedRow]);
+
+    const filteredRows = useMemo(() => {
+        const normalizedKeyword = keyword.trim().toLowerCase();
+        const base = normalizedKeyword
+            ? scoreRows.filter((row) => row.name.toLowerCase().includes(normalizedKeyword))
+            : scoreRows;
+
+        return [...base].sort((left, right) => right.score - left.score);
+    }, [keyword, scoreRows]);
+
+    const hunterRows = useMemo(() => {
+        return filteredRows.filter((row) => row.roleType === "hunter");
+    }, [filteredRows]);
+
+    const survivorRows = useMemo(() => {
+        return filteredRows.filter((row) => row.roleType === "survivor");
+    }, [filteredRows]);
+
+    const topScore = scoreRows.length > 0 ? scoreRows[0] : null;
+
+    const chartPoints = useMemo(() => {
+        if (historyItems.length === 0) {
+            return { polyline: "", minScore: 0, maxScore: 0 };
+        }
+
+        const scores = historyItems.map((item) => item.score);
+        const minScore = Math.min(...scores);
+        const maxScore = Math.max(...scores);
+        const scoreRange = Math.max(1, maxScore - minScore);
+        const step = historyItems.length > 1 ? (CHART_WIDTH - CHART_PADDING * 2) / (historyItems.length - 1) : 0;
+
+        const polyline = historyItems.map((item, index) => {
+            const x = CHART_PADDING + step * index;
+            const normalized = (item.score - minScore) / scoreRange;
+            const y = CHART_HEIGHT - CHART_PADDING - normalized * (CHART_HEIGHT - CHART_PADDING * 2);
+            return `${x},${y}`;
+        }).join(" ");
+
+        return { polyline, minScore, maxScore };
+    }, [historyItems]);
+
+    if (highlighted === "role-scores") {
+        return (
+            <div className={styles.page}>
+                <header className={styles.hero}>
+                    <p className={styles.badge}>Analysis Hub</p>
+                    <h2>所有角色認知分</h2>
+                    <p>查看你目前每個角色的最新認知分，支援搜尋與排序，先快速找到主力與弱項角色。</p>
+                </header>
+
+                <section className={styles.scoreToolbar}>
+                    <label className={styles.controlItem}>
+                        角色搜尋
+                        <input
+                            value={keyword}
+                            onChange={(event) => setKeyword(event.target.value)}
+                            placeholder="輸入角色名稱"
+                        />
+                    </label>
+                </section>
+
+                {topScore && (
+                    <section className={styles.summaryCard}>
+                        <p>目前最高認知分</p>
+                        <strong>{topScore.name}</strong>
+                        <span>{topScore.score.toLocaleString()} 分</span>
+                    </section>
+                )}
+
+                {scoresLoading && <div className={styles.stateBox}>認知分資料載入中...</div>}
+                {scoresError && <div className={`${styles.stateBox} ${styles.stateError}`}>{scoresError}</div>}
+
+                {!scoresLoading && !scoresError && (
+                    <>
+                        {filteredRows.length === 0 && <div className={styles.stateBox}>沒有符合條件的角色資料</div>}
+
+                        {hunterRows.length > 0 && (
+                            <section className={styles.roleSection}>
+                                <div className={styles.roleSectionHeader}>
+                                    <h3>監管者</h3>
+                                    <span>{hunterRows.length} 位角色</span>
+                                </div>
+                                <div className={styles.scoreGrid}>
+                                    {hunterRows.map((row) => (
+                                        <button
+                                            key={row.pid}
+                                            type="button"
+                                            className={styles.roleCard}
+                                            onClick={() => setSelectedRow(row)}
+                                        >
+                                            <p className={styles.roleName}>{row.name}</p>
+                                            <strong>{row.score.toLocaleString()}</strong>
+                                            <small>更新：{new Date(row.recordedAt).toLocaleDateString("zh-TW")}</small>
+                                        </button>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+
+                        {survivorRows.length > 0 && (
+                            <section className={styles.roleSection}>
+                                <div className={styles.roleSectionHeader}>
+                                    <h3>求生者</h3>
+                                    <span>{survivorRows.length} 位角色</span>
+                                </div>
+                                <div className={styles.scoreGrid}>
+                                    {survivorRows.map((row) => (
+                                        <button
+                                            key={row.pid}
+                                            type="button"
+                                            className={styles.roleCard}
+                                            onClick={() => setSelectedRow(row)}
+                                        >
+                                            <p className={styles.roleName}>{row.name}</p>
+                                            <strong>{row.score.toLocaleString()}</strong>
+                                            <small>更新：{new Date(row.recordedAt).toLocaleDateString("zh-TW")}</small>
+                                        </button>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+                    </>
+                )}
+
+                {selectedRow && (
+                    <div className={styles.modalBackdrop} onClick={() => setSelectedRow(null)}>
+                        <div className={styles.modal} onClick={(event) => event.stopPropagation()}>
+                            <div className={styles.modalHeader}>
+                                <div>
+                                    <p className={styles.modalBadge}>{selectedRow.roleType === "hunter" ? "監管者" : "求生者"}</p>
+                                    <h3>{selectedRow.name} 認知分趨勢</h3>
+                                </div>
+                                <button type="button" className={styles.modalClose} onClick={() => setSelectedRow(null)}>關閉</button>
+                            </div>
+
+                            {historyLoading && <div className={styles.stateBox}>載入近 30 筆趨勢資料中...</div>}
+                            {historyError && <div className={`${styles.stateBox} ${styles.stateError}`}>{historyError}</div>}
+
+                            {!historyLoading && !historyError && historyItems.length > 0 && (
+                                <div className={styles.chartWrap}>
+                                    <svg viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`} className={styles.lineChart}>
+                                        <line
+                                            x1={CHART_PADDING}
+                                            y1={CHART_PADDING}
+                                            x2={CHART_PADDING}
+                                            y2={CHART_HEIGHT - CHART_PADDING}
+                                            className={styles.axisLine}
+                                        />
+                                        <line
+                                            x1={CHART_PADDING}
+                                            y1={CHART_HEIGHT - CHART_PADDING}
+                                            x2={CHART_WIDTH - CHART_PADDING}
+                                            y2={CHART_HEIGHT - CHART_PADDING}
+                                            className={styles.axisLine}
+                                        />
+                                        <polyline points={chartPoints.polyline} className={styles.trendLine} />
+                                    </svg>
+                                    <div className={styles.chartMeta}>
+                                        <span>最低：{chartPoints.minScore.toLocaleString()}</span>
+                                        <span>最高：{chartPoints.maxScore.toLocaleString()}</span>
+                                        <span>最新：{historyItems[historyItems.length - 1]?.score.toLocaleString() ?? "-"}</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {!historyLoading && !historyError && historyItems.length === 0 && (
+                                <div className={styles.stateBox}>這個角色目前沒有足夠的歷史資料。</div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    }
 
     return (
         <div className={styles.page}>
@@ -59,9 +355,9 @@ export default function AnalysisCenterPage() {
                             <h3>{card.title}</h3>
                             <p className={styles.description}>{card.description}</p>
                             <p className={styles.chartPlan}>圖表規劃：{card.chartPlan}</p>
-                            <button type="button" className={styles.comingSoon}>
-                                子頁規劃中
-                            </button>
+                            <Link to={`/app/analysis?view=${card.queryValue}`} className={styles.enterButton}>
+                                進入功能
+                            </Link>
                         </article>
                     );
                 })}

@@ -72,14 +72,20 @@
     font-weight: 600;
 }
 
-.comingSoon {
+.enterButton {
+    display: inline-block;
+    text-decoration: none;
+    text-align: center;
     border: 1px solid rgba(95, 112, 145, 0.4);
     border-radius: 10px;
     background: rgba(95, 112, 145, 0.14);
     color: #dce4f5;
     padding: 8px 10px;
     font-weight: 700;
-    cursor: default;
+}
+
+.enterButton:hover {
+    background: rgba(95, 112, 145, 0.24);
 }
 
 .quickLinks {
@@ -113,4 +119,220 @@
 
 .quickLink:hover {
     background: rgba(79, 125, 255, 0.26);
+}
+
+.scoreToolbar {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--panel-bg);
+    padding: 14px;
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.controlItem {
+    display: grid;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-soft);
+}
+
+.controlItem input {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: rgba(9, 12, 19, 0.78);
+    color: #eef4ff;
+    padding: 9px 10px;
+}
+
+.summaryCard {
+    border: 1px solid rgba(40, 226, 192, 0.3);
+    border-radius: 16px;
+    background: linear-gradient(130deg, rgba(79, 125, 255, 0.14), rgba(40, 226, 192, 0.14));
+    padding: 16px;
+    display: grid;
+    gap: 4px;
+}
+
+.summaryCard p {
+    margin: 0;
+    color: var(--text-soft);
+    font-size: 13px;
+}
+
+.summaryCard strong {
+    font-size: 22px;
+}
+
+.summaryCard span {
+    color: #9de7d8;
+    font-weight: 700;
+}
+
+.roleSection {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--panel-bg);
+    padding: 12px;
+    display: grid;
+    gap: 12px;
+}
+
+.roleSectionHeader {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.roleSectionHeader h3 {
+    margin: 0;
+}
+
+.roleSectionHeader span {
+    color: var(--text-soft);
+    font-size: 13px;
+}
+
+.scoreGrid {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.roleCard {
+    border: 1px solid rgba(95, 112, 145, 0.28);
+    border-radius: 14px;
+    background: rgba(13, 17, 25, 0.72);
+    color: #eef3ff;
+    padding: 12px;
+    text-align: left;
+    display: grid;
+    gap: 6px;
+    cursor: pointer;
+    transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.roleCard:hover {
+    transform: translateY(-2px);
+    border-color: rgba(40, 226, 192, 0.42);
+    background: rgba(21, 30, 44, 0.9);
+}
+
+.roleName {
+    margin: 0;
+    color: #c9d4e7;
+    font-size: 13px;
+}
+
+.roleCard strong {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.roleCard small {
+    color: #9eabc0;
+}
+
+.modalBackdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 7, 14, 0.72);
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    z-index: 1200;
+}
+
+.modal {
+    width: min(760px, 100%);
+    border: 1px solid rgba(95, 112, 145, 0.35);
+    border-radius: 18px;
+    background: linear-gradient(165deg, rgba(15, 20, 31, 0.97), rgba(12, 16, 24, 0.97));
+    padding: 16px;
+    display: grid;
+    gap: 14px;
+}
+
+.modalHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.modalHeader h3 {
+    margin: 4px 0 0;
+}
+
+.modalBadge {
+    margin: 0;
+    color: #97d9ca;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+}
+
+.modalClose {
+    border: 1px solid rgba(95, 112, 145, 0.35);
+    border-radius: 10px;
+    background: rgba(95, 112, 145, 0.2);
+    color: #e6eefc;
+    font-weight: 700;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.chartWrap {
+    border: 1px solid rgba(95, 112, 145, 0.25);
+    border-radius: 14px;
+    background: rgba(8, 12, 19, 0.66);
+    padding: 10px;
+    display: grid;
+    gap: 8px;
+}
+
+.lineChart {
+    width: 100%;
+    height: auto;
+}
+
+.axisLine {
+    stroke: rgba(161, 178, 210, 0.38);
+    stroke-width: 1;
+}
+
+.trendLine {
+    fill: none;
+    stroke: #55d7bc;
+    stroke-width: 3;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.chartMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 13px;
+    color: #abc0de;
+}
+
+.stateBox {
+    border: 1px dashed rgba(95, 112, 145, 0.45);
+    border-radius: 14px;
+    padding: 14px;
+    color: var(--text-soft);
+    background: rgba(10, 13, 19, 0.66);
+}
+
+.stateError {
+    border-color: rgba(255, 128, 128, 0.4);
+    color: #ffd1d1;
+}
+
+@media (max-width: 900px) {
+    .modal {
+        padding: 12px;
+    }
 }
