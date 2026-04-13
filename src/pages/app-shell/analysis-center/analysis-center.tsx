@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import dataDict from "../../../../data.json";
 import { ApiError } from "../../../service/api";
@@ -30,6 +30,13 @@ const HUNTER_PIDS = new Set<number>([
 const CHART_WIDTH = 620;
 const CHART_HEIGHT = 240;
 const CHART_PADDING = 24;
+
+type ChartPoint = {
+    x: number;
+    y: number;
+    score: number;
+    recordedAt: string;
+};
 
 const ANALYSIS_CARDS: AnalysisCard[] = [
     {
@@ -66,6 +73,12 @@ export default function AnalysisCenterPage() {
     const [historyLoading, setHistoryLoading] = useState(false);
     const [historyError, setHistoryError] = useState<string | null>(null);
     const [historyItems, setHistoryItems] = useState<LadderScoreItem[]>([]);
+    const [isMobile, setIsMobile] = useState(() => {
+        if (typeof window === "undefined") return false;
+        return window.matchMedia("(max-width: 900px)").matches;
+    });
+    const [hoveredPointIndex, setHoveredPointIndex] = useState<number | null>(null);
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
     useEffect(() => {
         if (highlighted !== "role-scores") {
@@ -159,6 +172,22 @@ export default function AnalysisCenterPage() {
         };
     }, [selectedRow]);
 
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        const media = window.matchMedia("(max-width: 900px)");
+        const onChange = (event: MediaQueryListEvent) => {
+            setIsMobile(event.matches);
+            setHoveredPointIndex(null);
+        };
+
+        setIsMobile(media.matches);
+        media.addEventListener("change", onChange);
+
+        return () => {
+            media.removeEventListener("change", onChange);
+        };
+    }, []);
+
     const filteredRows = useMemo(() => {
         const normalizedKeyword = keyword.trim().toLowerCase();
         const base = normalizedKeyword
@@ -180,7 +209,7 @@ export default function AnalysisCenterPage() {
 
     const chartPoints = useMemo(() => {
         if (historyItems.length === 0) {
-            return { polyline: "", minScore: 0, maxScore: 0 };
+            return { points: [] as ChartPoint[], minScore: 0, maxScore: 0 };
         }
 
         const scores = historyItems.map((item) => item.score);
@@ -189,15 +218,81 @@ export default function AnalysisCenterPage() {
         const scoreRange = Math.max(1, maxScore - minScore);
         const step = historyItems.length > 1 ? (CHART_WIDTH - CHART_PADDING * 2) / (historyItems.length - 1) : 0;
 
-        const polyline = historyItems.map((item, index) => {
+        const points = historyItems.map((item, index) => {
             const x = CHART_PADDING + step * index;
             const normalized = (item.score - minScore) / scoreRange;
             const y = CHART_HEIGHT - CHART_PADDING - normalized * (CHART_HEIGHT - CHART_PADDING * 2);
-            return `${x},${y}`;
-        }).join(" ");
+            return { x, y, score: item.score, recordedAt: item.recorded_at };
+        });
 
-        return { polyline, minScore, maxScore };
+        return { points, minScore, maxScore };
     }, [historyItems]);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas || chartPoints.points.length === 0) return;
+
+        const context = canvas.getContext("2d");
+        if (!context) return;
+
+        context.clearRect(0, 0, CHART_WIDTH, CHART_HEIGHT);
+
+        context.strokeStyle = "rgba(161, 178, 210, 0.38)";
+        context.lineWidth = 1;
+
+        context.beginPath();
+        context.moveTo(CHART_PADDING, CHART_PADDING);
+        context.lineTo(CHART_PADDING, CHART_HEIGHT - CHART_PADDING);
+        context.lineTo(CHART_WIDTH - CHART_PADDING, CHART_HEIGHT - CHART_PADDING);
+        context.stroke();
+
+        context.beginPath();
+        context.strokeStyle = "#55d7bc";
+        context.lineWidth = 3;
+        chartPoints.points.forEach((point, index) => {
+            if (index === 0) {
+                context.moveTo(point.x, point.y);
+            } else {
+                context.lineTo(point.x, point.y);
+            }
+        });
+        context.stroke();
+
+        chartPoints.points.forEach((point, index) => {
+            const isHovered = hoveredPointIndex === index;
+            context.beginPath();
+            context.fillStyle = isHovered ? "#ffe082" : "#7ce0cd";
+            context.arc(point.x, point.y, isHovered ? 5 : 3, 0, Math.PI * 2);
+            context.fill();
+        });
+    }, [chartPoints.points, hoveredPointIndex]);
+
+    const hoveredPoint = hoveredPointIndex === null ? null : chartPoints.points[hoveredPointIndex] ?? null;
+
+    function handleCanvasMouseMove(event: React.MouseEvent<HTMLCanvasElement>) {
+        if (isMobile || chartPoints.points.length === 0) return;
+
+        const rect = event.currentTarget.getBoundingClientRect();
+        const scaleX = CHART_WIDTH / rect.width;
+        const scaleY = CHART_HEIGHT / rect.height;
+        const x = (event.clientX - rect.left) * scaleX;
+        const y = (event.clientY - rect.top) * scaleY;
+
+        let nearestIndex = 0;
+        let nearestDistance = Number.POSITIVE_INFINITY;
+
+        chartPoints.points.forEach((point, index) => {
+            const dx = point.x - x;
+            const dy = point.y - y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestIndex = index;
+            }
+        });
+
+        setHoveredPointIndex(nearestDistance < 24 ? nearestIndex : null);
+    }
 
     if (highlighted === "role-scores") {
         return (
@@ -298,28 +393,43 @@ export default function AnalysisCenterPage() {
 
                             {!historyLoading && !historyError && historyItems.length > 0 && (
                                 <div className={styles.chartWrap}>
-                                    <svg viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`} className={styles.lineChart}>
-                                        <line
-                                            x1={CHART_PADDING}
-                                            y1={CHART_PADDING}
-                                            x2={CHART_PADDING}
-                                            y2={CHART_HEIGHT - CHART_PADDING}
-                                            className={styles.axisLine}
+                                    <div className={styles.chartArea}>
+                                        <canvas
+                                            ref={canvasRef}
+                                            width={CHART_WIDTH}
+                                            height={CHART_HEIGHT}
+                                            className={styles.lineCanvas}
+                                            onMouseMove={handleCanvasMouseMove}
+                                            onMouseLeave={() => setHoveredPointIndex(null)}
                                         />
-                                        <line
-                                            x1={CHART_PADDING}
-                                            y1={CHART_HEIGHT - CHART_PADDING}
-                                            x2={CHART_WIDTH - CHART_PADDING}
-                                            y2={CHART_HEIGHT - CHART_PADDING}
-                                            className={styles.axisLine}
-                                        />
-                                        <polyline points={chartPoints.polyline} className={styles.trendLine} />
-                                    </svg>
+                                        {hoveredPoint && (
+                                            <div
+                                                className={styles.hoverTooltip}
+                                                style={{
+                                                    left: `${(hoveredPoint.x / CHART_WIDTH) * 100}%`,
+                                                    top: `${(hoveredPoint.y / CHART_HEIGHT) * 100}%`,
+                                                }}
+                                            >
+                                                <strong>{hoveredPoint.score.toLocaleString()} 分</strong>
+                                                <span>{new Date(hoveredPoint.recordedAt).toLocaleString("zh-TW")}</span>
+                                            </div>
+                                        )}
+                                    </div>
                                     <div className={styles.chartMeta}>
                                         <span>最低：{chartPoints.minScore.toLocaleString()}</span>
                                         <span>最高：{chartPoints.maxScore.toLocaleString()}</span>
                                         <span>最新：{historyItems[historyItems.length - 1]?.score.toLocaleString() ?? "-"}</span>
                                     </div>
+                                    {isMobile && (
+                                        <div className={styles.mobileHistoryList}>
+                                            {historyItems.map((item) => (
+                                                <div key={item.id} className={styles.mobileHistoryItem}>
+                                                    <span>{new Date(item.recorded_at).toLocaleDateString("zh-TW")}</span>
+                                                    <strong>{item.score.toLocaleString()} 分</strong>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
