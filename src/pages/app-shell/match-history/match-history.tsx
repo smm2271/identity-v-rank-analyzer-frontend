@@ -26,7 +26,7 @@ function formatMatchType(matchType: number | null): string {
 function formatRole(utype: number | null): string {
     if (utype === null) return "未知";
     // 1: 監管, 2: 求生 (Usually Identity-V specific utype encoding)
-    return utype === 1 ? "監管" : utype === 2 ? "求生" : `角色定位 ${utype}`;
+    return utype === 1 ? "監管" : utype === 2 ? "求生" : `陣營 ${utype}`;
 }
 
 function formatCharacter(pid: number | null): string {
@@ -248,20 +248,20 @@ export default function MatchHistoryPage() {
                 </label>
 
                 <label className={styles.filterItem} htmlFor="role-filter-select">
-                    定位篩選
+                    陣營篩選
                     <select
                         id="role-filter-select"
                         value={roleFilter}
                         onChange={(e) => setRoleFilter(e.target.value)}
                     >
-                        <option value="all">全部定位</option>
+                        <option value="all">全部陣營</option>
                         <option value="hunter">監管</option>
                         <option value="survivor">求生</option>
                     </select>
                 </label>
 
                 <label className={styles.filterItem} htmlFor="character-keyword-input">
-                    角色關鍵字
+                    按關鍵字搜尋角色
                     <input
                         id="character-keyword-input"
                         type="text"
@@ -280,8 +280,8 @@ export default function MatchHistoryPage() {
                     >
                         <option value="timeDesc">時間：新到舊</option>
                         <option value="timeAsc">時間：舊到新</option>
-                        <option value="killDesc">擊殺：高到低</option>
-                        <option value="killAsc">擊殺：低到高</option>
+                        <option value="killDesc">淘汰人數：高到低</option>
+                        <option value="killAsc">淘汰人數：低到高</option>
                     </select>
                 </label>
 
@@ -310,9 +310,9 @@ export default function MatchHistoryPage() {
                             <tr>
                                 <th>對戰時間</th>
                                 <th>模式</th>
-                                <th>角色定位</th>
-                                <th>角色 ID</th>
-                                <th>擊殺</th>
+                                <th>陣營</th>
+                                <th>角色名</th>
+                                <th>淘汰人數</th>
                             </tr>
                         </thead>
                         <tbody>
