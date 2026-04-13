@@ -17,6 +17,7 @@ const DashboardShell = lazy(() => import('./pages/app-shell/dashboard-shell'));
 const DashboardOverviewPage = lazy(() => import('./pages/app-shell/dashboard-overview/dashboard-overview'));
 const MatchHistoryPage = lazy(() => import('./pages/app-shell/match-history/match-history'));
 const ApiKeysPage = lazy(() => import('./pages/app-shell/api-keys/api-keys'));
+const AnalysisCenterPage = lazy(() => import('./pages/app-shell/analysis-center/analysis-center'));
 
 // 裡網站組件 (延遲載入：只有進到該頁面才會下載程式碼，優化效能)
 // const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
@@ -46,6 +47,7 @@ function App() {
               <Route path="dashboard" element={<DashboardOverviewPage />} />
               <Route path="history" element={<MatchHistoryPage />} />
               <Route path="api-keys" element={<ApiKeysPage />} />
+              <Route path="analysis" element={<AnalysisCenterPage />} />
             </Route>
           </Route>
 

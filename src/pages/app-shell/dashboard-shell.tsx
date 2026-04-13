@@ -1,15 +1,20 @@
 import { useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../../service/auth.service";
 import { useUserAuthStore } from "../../service/user_auth.service";
 import styles from "./dashboard-shell.module.css";
 
 export default function DashboardShell() {
     const navigate = useNavigate();
+    const location = useLocation();
     const username = useUserAuthStore((state) => state.username);
     const accessToken = useUserAuthStore((state) => state.accessToken);
     const clearAuth = useUserAuthStore((state) => state.clearAuth);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [analysisMenuOpen, setAnalysisMenuOpen] = useState(false);
+
+    const analysisView = new URLSearchParams(location.search).get("view");
+    const isAnalysisPath = location.pathname.startsWith("/app/analysis");
 
     async function handleLogout() {
         try {
@@ -26,6 +31,10 @@ export default function DashboardShell() {
 
     function closeSidebarOnNavigate() {
         setSidebarOpen(false);
+    }
+
+    function getAnalysisSubmenuItemClass(view: string) {
+        return `${styles.submenuItem} ${analysisView === view ? styles.submenuItemActive : ""}`;
     }
 
     return (
@@ -69,7 +78,55 @@ export default function DashboardShell() {
                     >
                         API Keys
                     </NavLink>
-                    <span className={`${styles.navItem} ${styles.navItemMuted}`}>分析中心（規劃中）</span>
+
+                    <div
+                        className={`${styles.navGroup} ${analysisMenuOpen ? styles.navGroupOpen : ""}`}
+                        onMouseEnter={() => setAnalysisMenuOpen(true)}
+                        onMouseLeave={() => setAnalysisMenuOpen(false)}
+                    >
+                        <div className={styles.navGroupHeader}>
+                            <NavLink
+                                to="/app/analysis"
+                                onClick={closeSidebarOnNavigate}
+                                className={`${styles.navItem} ${styles.navGroupLink} ${isAnalysisPath ? styles.navItemActive : ""}`}
+                            >
+                                分析中心
+                            </NavLink>
+                            <button
+                                type="button"
+                                className={styles.navExpandButton}
+                                onClick={() => setAnalysisMenuOpen((prev) => !prev)}
+                                aria-label="Toggle analysis submenu"
+                                aria-expanded={analysisMenuOpen}
+                            >
+                                ▾
+                            </button>
+                        </div>
+
+                        <div className={styles.submenu}>
+                            <Link
+                                to="/app/analysis?view=role-scores"
+                                onClick={closeSidebarOnNavigate}
+                                className={getAnalysisSubmenuItemClass("role-scores")}
+                            >
+                                所有角色認知分
+                            </Link>
+                            <Link
+                                to="/app/analysis?view=lineup-analysis"
+                                onClick={closeSidebarOnNavigate}
+                                className={getAnalysisSubmenuItemClass("lineup-analysis")}
+                            >
+                                陣容相剋與搭配
+                            </Link>
+                            <Link
+                                to="/app/analysis?view=map-character"
+                                onClick={closeSidebarOnNavigate}
+                                className={getAnalysisSubmenuItemClass("map-character")}
+                            >
+                                地圖 x 角色交叉
+                            </Link>
+                        </div>
+                    </div>
                 </nav>
 
                 <div className={styles.sidebarBottom}>

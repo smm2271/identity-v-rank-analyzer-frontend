@@ -1,0 +1,116 @@
+.page {
+    --panel-bg: rgba(15, 19, 28, 0.72);
+    --line: rgba(95, 112, 145, 0.3);
+    --text-soft: #b5bfd0;
+
+    display: grid;
+    gap: 18px;
+}
+
+.hero {
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: linear-gradient(150deg, rgba(79, 125, 255, 0.18), rgba(40, 226, 192, 0.14));
+    padding: 20px;
+}
+
+.badge {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #80a4ff;
+    font-weight: 700;
+}
+
+.hero h2 {
+    margin: 6px 0 10px;
+    font-size: clamp(24px, 3vw, 32px);
+}
+
+.hero p {
+    margin: 0;
+    color: var(--text-soft);
+    line-height: 1.6;
+}
+
+.grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.card {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--panel-bg);
+    padding: 16px;
+    display: grid;
+    gap: 10px;
+}
+
+.cardHighlighted {
+    border-color: rgba(40, 226, 192, 0.6);
+    box-shadow: 0 0 0 1px rgba(40, 226, 192, 0.25), 0 10px 24px rgba(21, 38, 58, 0.42);
+}
+
+.card h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.description {
+    margin: 0;
+    color: var(--text-soft);
+    line-height: 1.5;
+}
+
+.chartPlan {
+    margin: 0;
+    color: #8fd1ff;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.comingSoon {
+    border: 1px solid rgba(95, 112, 145, 0.4);
+    border-radius: 10px;
+    background: rgba(95, 112, 145, 0.14);
+    color: #dce4f5;
+    padding: 8px 10px;
+    font-weight: 700;
+    cursor: default;
+}
+
+.quickLinks {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--panel-bg);
+    padding: 16px;
+    display: grid;
+    gap: 10px;
+}
+
+.quickLinks h3 {
+    margin: 0;
+}
+
+.quickLinkList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.quickLink {
+    text-decoration: none;
+    color: #eaf2ff;
+    font-weight: 700;
+    border: 1px solid rgba(79, 125, 255, 0.4);
+    border-radius: 10px;
+    padding: 8px 12px;
+    background: rgba(79, 125, 255, 0.16);
+}
+
+.quickLink:hover {
+    background: rgba(79, 125, 255, 0.26);
+}
