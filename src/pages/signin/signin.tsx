@@ -34,8 +34,17 @@ export default function Signin() {
             sessionStorage.setItem("oauth_provider", provider);
             sessionStorage.setItem("oauth_redirect_uri", redirectUri);
 
+            // 驗證 authorization_url 的安全性 (防範 Open Redirect 弱點 S6105)
+            // 由於連結來自後端因此不具直接信任度，需確保符合預期的協議與 OAuth 供應商網域
+            const parsedAuthUrl = new URL(String(authorization_url));
+            const validHosts = ["discord.com", "accounts.google.com"];
+
+            if (parsedAuthUrl.protocol !== "https:" || !validHosts.includes(parsedAuthUrl.hostname)) {
+                throw new Error("不信任的授權連結來源或安全協定");
+            }
+
             // 導向 OAuth 供應商授權頁面
-            window.location.href = authorization_url;
+            window.location.href = parsedAuthUrl.href;
         } catch (err) {
             setOauthLoading(null);
             if (err instanceof ApiError) {
