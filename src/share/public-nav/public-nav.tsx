@@ -57,6 +57,15 @@ export default function PublicNav() {
 
   return (
     <header className={styles.publicNav}>
+      {isMenuOpen && (
+        <button
+          type="button"
+          className={styles.mobileMask}
+          onClick={collapseAllMenus}
+          aria-label="關閉選單"
+        />
+      )}
+
       <div className={styles.navFrame}>
         <div className={styles.brandRow}>
           <Link to="/" className={styles.brandLink} onClick={collapseAllMenus}>
