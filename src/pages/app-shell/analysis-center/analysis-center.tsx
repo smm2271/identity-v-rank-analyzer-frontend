@@ -372,8 +372,18 @@ export default function AnalysisCenterPage() {
                 )}
 
                 {selectedRow && (
-                    <div className={styles.modalBackdrop} onClick={() => setSelectedRow(null)}>
-                        <div className={styles.modal} onClick={(event) => event.stopPropagation()}>
+                    <div
+                        className={styles.modalBackdrop}
+                        onClick={() => setSelectedRow(null)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelectedRow(null); }}
+                        role="presentation"
+                    >
+                        <div
+                            className={styles.modal}
+                            onClick={(event) => event.stopPropagation()}
+                            onKeyDown={(event) => event.stopPropagation()}
+                            role="presentation"
+                        >
                             <div className={styles.modalHeader}>
                                 <div>
                                     <p className={styles.modalBadge}>{selectedRow.roleType === "hunter" ? "監管者" : "求生者"}</p>

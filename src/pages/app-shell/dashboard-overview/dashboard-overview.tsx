@@ -362,8 +362,17 @@ export default function DashboardOverviewPage() {
             </div>
 
             {showCardSelector && (
-                <div className={styles.cardSelectorOverlay} onClick={() => setShowCardSelector(false)}>
-                    <section className={styles.cardSelectorPanel} onClick={(e) => e.stopPropagation()}>
+                <div
+                    className={styles.cardSelectorOverlay}
+                    onClick={() => setShowCardSelector(false)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowCardSelector(false); }}
+                    role="presentation"
+                >
+                    <section
+                        className={styles.cardSelectorPanel}
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
+                    >
                         <div className={styles.cardSelectorHeader}>
                             <h3>選擇要顯示的卡片 (可拖拽排序)</h3>
                             <button
