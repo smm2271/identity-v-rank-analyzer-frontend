@@ -25,12 +25,14 @@ export default function Signin() {
             const redirectUri = `${window.location.origin}${OAUTH_CALLBACK_PATH}`;
             const { authorization_url, state } = await getOAuthAuthorizeUrl(provider, redirectUri);
 
-            // 淨化從後端取得的資料以符合資安規範 (SonarQube S8475)
-            // 由於 state 為隨機字串，我們剔除掉潛在的惡意/非正規字元
-            const sanitizedState = String(state).replace(/[^a-zA-Z0-9\-_=.]/g, '');
+            // 驗證從後端取得的資料以符合資安規範 (SonarQube S8475)
+            // 阻擋未依預期格式的污點資料 (Tainted Data) 直接寫入 Storage 以徹底清除 Taint 標記
+            if (typeof state !== "string" || !/^[a-zA-Z0-9\-_=.]+$/.test(state)) {
+                throw new Error("無效或不安全的 OAuth State 格式");
+            }
 
             // 將 state、provider、redirect_uri 暫存到 sessionStorage（供 callback 頁面驗證用）
-            sessionStorage.setItem("oauth_state", sanitizedState);
+            sessionStorage.setItem("oauth_state", state);
             sessionStorage.setItem("oauth_provider", provider);
             sessionStorage.setItem("oauth_redirect_uri", redirectUri);
 
