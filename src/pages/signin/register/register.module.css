@@ -66,7 +66,7 @@ div.pwdtxt {
     margin-bottom: 1rem;
 }
 
-.registerForm form button {
+.registerForm form button[type="submit"] {
     width: 100%;
     border: none;
     outline: none;
@@ -134,7 +134,7 @@ div.inputContainer i {
     margin: 0;
 }
 
-.registerForm form button:disabled {
+.registerForm form button[type="submit"]:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }

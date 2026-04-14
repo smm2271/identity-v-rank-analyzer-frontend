@@ -68,7 +68,7 @@ div.pwdtxt {
     margin-bottom: 1rem;
 }
 
-.loginForm form button {
+.loginForm form button[type="submit"] {
     width: 100%;
     border: none;
     outline: none;
@@ -125,7 +125,8 @@ div.inputContainer i {
     margin: 0;
 }
 
-.loginForm form button:disabled {
+
+.loginForm form button[type="submit"]:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }

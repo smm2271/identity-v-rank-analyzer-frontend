@@ -52,14 +52,15 @@ export default function Login() {
                 </div>
                 <div className={styles.inputContainer}>
                     <input type={showPassword ? "text" : "password"} placeholder="密碼" id="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                    <button
-                        type="button"
+                    <i
+                        className={showPassword ? "fa-solid fa-eye" : "fa-solid fa-eye-slash"}
                         onClick={() => setShowPassword(!showPassword)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowPassword(!showPassword); }}
+                        role="button"
+                        tabIndex={0}
                         aria-label={showPassword ? "隱藏密碼" : "顯示密碼"}
-                    >
-                        <i className={showPassword ? "fa-solid fa-eye" : "fa-solid fa-eye-slash"}></i>
-                    </button>
+                        style={{ cursor: "pointer" }}
+                    ></i>
                 </div>
 
                 <div className={styles.rememberContainer}>

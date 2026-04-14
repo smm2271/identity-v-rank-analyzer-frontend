@@ -13,6 +13,8 @@ export default function Register() {
     const [userId, setUserId] = useState("");
     const [password, setPassword] = useState("");
     const [checkPassword, setCheckPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showCheckPassword, setShowCheckPassword] = useState(false);
     const [tosChecked, setTosChecked] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -66,14 +68,30 @@ export default function Register() {
 
                 <label htmlFor="password">密碼</label>
                 <div className={styles.inputContainer}>
-                    <input type="password" placeholder="Password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                    <i className="fa-solid fa-lock"></i>
+                    <input type={showPassword ? "text" : "password"} placeholder="Password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                    <i
+                        className={showPassword ? "fa-solid fa-eye" : "fa-solid fa-eye-slash"}
+                        onClick={() => setShowPassword(!showPassword)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowPassword(!showPassword); }}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={showPassword ? "隱藏密碼" : "顯示密碼"}
+                        style={{ cursor: "pointer" }}
+                    ></i>
                 </div>
 
                 <label htmlFor="checkpassword">確認密碼</label>
                 <div className={styles.inputContainer}>
-                    <input type="password" placeholder="Confirm Password" id="checkpassword" value={checkPassword} onChange={(e) => setCheckPassword(e.target.value)} />
-                    <i className="fa-solid fa-lock"></i>
+                    <input type={showCheckPassword ? "text" : "password"} placeholder="Confirm Password" id="checkpassword" value={checkPassword} onChange={(e) => setCheckPassword(e.target.value)} />
+                    <i
+                        className={showCheckPassword ? "fa-solid fa-eye" : "fa-solid fa-eye-slash"}
+                        onClick={() => setShowCheckPassword(!showCheckPassword)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowCheckPassword(!showCheckPassword); }}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={showCheckPassword ? "隱藏密碼" : "顯示密碼"}
+                        style={{ cursor: "pointer" }}
+                    ></i>
                 </div>
 
                 <div className={styles.checktos}>
