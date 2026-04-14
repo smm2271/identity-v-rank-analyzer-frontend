@@ -598,42 +598,6 @@
     .chartGrid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-
-    .cardTotalMatches {
-        order: 1;
-    }
-
-    .cardSurvivorEscapeRate {
-        order: 2;
-    }
-
-    .cardHunterAverageKill {
-        order: 3;
-    }
-
-    .cardModeDistribution {
-        order: 1;
-    }
-
-    .cardHunterResults {
-        order: 2;
-    }
-
-    .cardSurvivorResults {
-        order: 3;
-    }
-
-    .cardMapDistribution {
-        order: 4;
-    }
-
-    .cardHunterTopRoles {
-        order: 5;
-    }
-
-    .cardSurvivorTopRoles {
-        order: 6;
-    }
 }
 
 @media (max-width: 960px) {
@@ -653,54 +617,20 @@
 
 @media (max-width: 720px) {
     .page {
-        display: grid;
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
         gap: 10px;
     }
 
     .metricGrid,
     .chartGrid {
-        display: contents;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
     }
 
     .heroStats {
         grid-template-columns: 1fr;
-    }
-
-    .cardTotalMatches {
-        order: 1;
-    }
-
-    .cardModeDistribution {
-        order: 2;
-    }
-
-    .cardMapDistribution {
-        order: 3;
-    }
-
-    .cardHunterAverageKill {
-        order: 4;
-    }
-
-    .cardSurvivorEscapeRate {
-        order: 5;
-    }
-
-    .cardHunterResults {
-        order: 6;
-    }
-
-    .cardHunterTopRoles {
-        order: 7;
-    }
-
-    .cardSurvivorResults {
-        order: 8;
-    }
-
-    .cardSurvivorTopRoles {
-        order: 9;
     }
 
     .panelHeader {

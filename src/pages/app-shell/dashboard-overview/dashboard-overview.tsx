@@ -157,6 +157,13 @@ export default function DashboardOverviewPage() {
     );
     const [draggedCard, setDraggedCard] = useState<CardKey | null>(null);
     const [previewOrder, setPreviewOrder] = useState<CardKey[] | null>(null);
+    const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth <= 720 : false);
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth <= 720);
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     useEffect(() => {
         const savedVisible = localStorage.getItem('dashboardVisibleCards');
@@ -445,7 +452,8 @@ export default function DashboardOverviewPage() {
                             return (
                                 <article
                                     key={key}
-                                    draggable
+                                    draggable={!isMobile}
+                                    style={{ order: effectiveOrder.indexOf(key) }}
                                     onDragStart={() => handleCardDragStart(key)}
                                     onDragOver={handleCardDragOver}
                                     onDragEnter={() => handleCardDragEnter(key)}
@@ -463,7 +471,8 @@ export default function DashboardOverviewPage() {
                             return (
                                 <article
                                     key={key}
-                                    draggable
+                                    draggable={!isMobile}
+                                    style={{ order: effectiveOrder.indexOf(key) }}
                                     onDragStart={() => handleCardDragStart(key)}
                                     onDragOver={handleCardDragOver}
                                     onDragEnter={() => handleCardDragEnter(key)}
@@ -481,7 +490,8 @@ export default function DashboardOverviewPage() {
                             return (
                                 <article
                                     key={key}
-                                    draggable
+                                    draggable={!isMobile}
+                                    style={{ order: effectiveOrder.indexOf(key) }}
                                     onDragStart={() => handleCardDragStart(key)}
                                     onDragOver={handleCardDragOver}
                                     onDragEnter={() => handleCardDragEnter(key)}
@@ -509,7 +519,8 @@ export default function DashboardOverviewPage() {
                             return (
                                 <article
                                     key={key}
-                                    draggable
+                                    draggable={!isMobile}
+                                    style={{ order: effectiveOrder.indexOf(key) }}
                                     onDragStart={() => handleCardDragStart(key)}
                                     onDragOver={handleCardDragOver}
                                     onDragEnter={() => handleCardDragEnter(key)}
@@ -563,7 +574,8 @@ export default function DashboardOverviewPage() {
                             return (
                                 <article
                                     key={key}
-                                    draggable
+                                    draggable={!isMobile}
+                                    style={{ order: effectiveOrder.indexOf(key) }}
                                     onDragStart={() => handleCardDragStart(key)}
                                     onDragOver={handleCardDragOver}
                                     onDragEnter={() => handleCardDragEnter(key)}
@@ -594,7 +606,8 @@ export default function DashboardOverviewPage() {
                             return (
                                 <article
                                     key={key}
-                                    draggable
+                                    draggable={!isMobile}
+                                    style={{ order: effectiveOrder.indexOf(key) }}
                                     onDragStart={() => handleCardDragStart(key)}
                                     onDragOver={handleCardDragOver}
                                     onDragEnter={() => handleCardDragEnter(key)}
@@ -628,7 +641,8 @@ export default function DashboardOverviewPage() {
                             return (
                                 <article
                                     key={key}
-                                    draggable
+                                    draggable={!isMobile}
+                                    style={{ order: effectiveOrder.indexOf(key) }}
                                     onDragStart={() => handleCardDragStart(key)}
                                     onDragOver={handleCardDragOver}
                                     onDragEnter={() => handleCardDragEnter(key)}
@@ -662,7 +676,8 @@ export default function DashboardOverviewPage() {
                             return (
                                 <article
                                     key={key}
-                                    draggable
+                                    draggable={!isMobile}
+                                    style={{ order: effectiveOrder.indexOf(key) }}
                                     onDragStart={() => handleCardDragStart(key)}
                                     onDragOver={handleCardDragOver}
                                     onDragEnter={() => handleCardDragEnter(key)}
@@ -697,7 +712,8 @@ export default function DashboardOverviewPage() {
                             return (
                                 <article
                                     key={key}
-                                    draggable
+                                    draggable={!isMobile}
+                                    style={{ order: effectiveOrder.indexOf(key) }}
                                     onDragStart={() => handleCardDragStart(key)}
                                     onDragOver={handleCardDragOver}
                                     onDragEnter={() => handleCardDragEnter(key)}
