@@ -88,6 +88,7 @@ export default function MatchHistoryPage() {
     const [roleFilter, setRoleFilter] = useState<string>("all");
     const [characterKeyword, setCharacterKeyword] = useState("");
     const [sortBy, setSortBy] = useState<"timeDesc" | "timeAsc" | "killDesc" | "killAsc">("timeDesc");
+    const [showFilters, setShowFilters] = useState(false);
     const tableWrapRef = useRef<HTMLDivElement | null>(null);
     const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
 
@@ -256,6 +257,18 @@ export default function MatchHistoryPage() {
                 </label>
             </div>
 
+            <div className={styles.filterToggleRow}>
+                <button
+                    type="button"
+                    className={styles.filterToggleButton}
+                    onClick={() => setShowFilters((prev) => !prev)}
+                    aria-expanded={showFilters}
+                >
+                    {showFilters ? "收合篩選器" : "展開篩選器"}
+                </button>
+            </div>
+
+            {showFilters && (
             <div className={styles.filterBar}>
                 <label className={styles.filterItem} htmlFor="mode-filter-select">
                     模式篩選
@@ -319,6 +332,7 @@ export default function MatchHistoryPage() {
                     </button>
                 </div>
             </div>
+            )}
 
             {loading && <div className={styles.stateBox}>讀取中...</div>}
             {!loading && error && <div className={`${styles.stateBox} ${styles.stateError}`}>{error}</div>}

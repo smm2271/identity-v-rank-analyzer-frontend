@@ -45,6 +45,28 @@
     font-weight: 700;
 }
 
+.filterToggleRow {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+.filterToggleButton {
+    border: 1px solid #2b3645;
+    border-radius: 10px;
+    background: #162131;
+    color: #e8f0fd;
+    padding: 8px 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.filterToggleButton:hover {
+    background: #21324a;
+    border-color: #3a5378;
+}
+
 .filterBar {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
