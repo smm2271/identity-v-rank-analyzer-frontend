@@ -27,7 +27,8 @@ export default function Signin() {
 
             // 驗證從後端取得的資料以符合資安規範 (SonarQube S8475)
             // 阻擋未依預期格式的污點資料 (Tainted Data) 直接寫入 Storage 以徹底清除 Taint 標記
-            if (typeof state !== "string" || !/^[a-zA-Z0-9\-_=.]+$/.test(state)) {
+            // 後端 state 格式為 nonce:timestamp:signature，需允許冒號字元
+            if (typeof state !== "string" || !/^[a-zA-Z0-9\-_=.:]+$/.test(state)) {
                 throw new Error("無效或不安全的 OAuth State 格式");
             }
 
