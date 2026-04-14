@@ -90,16 +90,26 @@
     transition: max-height 220ms ease, opacity 220ms ease, transform 220ms ease;
 }
 
-.navGroupOpen .submenu,
-.navGroup:hover .submenu {
+.navGroupOpen .submenu {
     max-height: 180px;
     opacity: 1;
     transform: translateY(0);
 }
 
-.navGroupOpen .navExpandButton,
-.navGroup:hover .navExpandButton {
+.navGroupOpen .navExpandButton {
     transform: rotate(180deg);
+}
+
+@media (min-width: 961px) {
+    .navGroup:hover .submenu {
+        max-height: 180px;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .navGroup:hover .navExpandButton {
+        transform: rotate(180deg);
+    }
 }
 
 .submenuItem {
@@ -235,12 +245,6 @@
 
     .navItem {
         flex: none;
-    }
-
-    .navGroup:hover .submenu {
-        max-height: 0;
-        opacity: 0;
-        transform: translateY(-2px);
     }
 
     .navGroupOpen .submenu {

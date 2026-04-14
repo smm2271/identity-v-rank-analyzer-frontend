@@ -65,8 +65,6 @@ export default function AppNav({ sidebarOpen, onCloseSidebar, username, onLogout
 
                     <div
                         className={`${styles.navGroup} ${analysisMenuOpen ? styles.navGroupOpen : ""}`}
-                        onMouseEnter={() => setAnalysisMenuOpen(true)}
-                        onMouseLeave={() => setAnalysisMenuOpen(false)}
                     >
                         <div className={styles.navGroupHeader}>
                             <NavLink
