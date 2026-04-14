@@ -4,23 +4,48 @@ import styles from './public-nav.module.css';
 import { logout } from '../../service/auth.service';
 import { useUserAuthStore } from '../../service/user_auth.service';
 
+const INTRODUCTION_ITEMS = [
+  { key: 'features', to: '/features', label: '功能介紹' },
+  { key: 'terms', to: { pathname: '/docs', search: '?doc=terms' }, label: '使用條款' },
+  { key: 'about', to: '/about', label: '關於計畫' },
+];
+
+const GUEST_ITEMS = [
+  {
+    key: 'login',
+    to: { pathname: '/signin', search: '?type=login' },
+    label: '登入',
+    className: 'loginBtn',
+  },
+  {
+    key: 'register',
+    to: { pathname: '/signin', search: '?type=register' },
+    label: '註冊',
+    className: 'registerBtn',
+  },
+];
+
 export default function PublicNav() {
-  const [open, setOpen] = useState(false);
-  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
   const navigate = useNavigate();
-  const accessToken = useUserAuthStore((state) => state.accessToken);
+  const token = useUserAuthStore((state) => state.accessToken);
   const username = useUserAuthStore((state) => state.username);
   const clearAuth = useUserAuthStore((state) => state.clearAuth);
+  const signedIn = Boolean(token && username);
 
-  const toggle = () => setOpen((prev) => !prev);
-  const close = () => setOpen(false);
+  const collapseAllMenus = () => {
+    setIsMenuOpen(false);
+    setIsAccountOpen(false);
+  };
 
   async function handleLogout() {
-    setAccountMenuOpen(false);
+    setIsAccountOpen(false);
+    setIsMenuOpen(false);
 
-    if (accessToken) {
+    if (token) {
       try {
-        await logout(accessToken);
+        await logout(token);
       } catch {
         // 登出以本地狀態清除為主，伺服器失敗時仍讓使用者離線
       }
@@ -31,60 +56,73 @@ export default function PublicNav() {
   }
 
   return (
-    <div className={styles.publicNav}>
-      <div className={styles.brandRow}>
-        <Link to="/" onClick={close}><h1>第五人格分析小工具</h1></Link>
-        <button
-          type="button"
-          className={`${styles.burger} ${open ? styles.burgerOpen : ''}`}
-          onClick={toggle}
-          aria-label="切換選單"
-          aria-expanded={open}
-        >
-          <span />
-          <span />
-          <span />
-        </button>
-      </div>
-
-      <div className={`${styles.navLinks} ${open ? styles.open : ''}`}>
-        <div className={styles.introductionBtns}>
-          <NavLink to="/features" onClick={close}>功能介紹</NavLink>
-          <NavLink to={{ pathname: '/docs', search: '?doc=terms' }} onClick={close}>使用條款</NavLink>
-          <NavLink to="/about" onClick={close}>關於計畫</NavLink>
+    <header className={styles.publicNav}>
+      <div className={styles.navFrame}>
+        <div className={styles.brandRow}>
+          <Link to="/" className={styles.brandLink} onClick={collapseAllMenus}>
+            <h1>第五人格分析小工具</h1>
+          </Link>
+          <button
+            type="button"
+            className={`${styles.burger} ${isMenuOpen ? styles.burgerOpen : ''}`}
+            onClick={() => setIsMenuOpen((prev) => !prev)}
+            aria-label="切換選單"
+            aria-expanded={isMenuOpen}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
         </div>
 
-        <div className={styles.loginSignInBtns}>
-          {accessToken && username ? (
-            <div className={styles.accountMenu}>
-              <button
-                type="button"
-                className={styles.accountButton}
-                onClick={() => setAccountMenuOpen((prev) => !prev)}
-                aria-expanded={accountMenuOpen}
-              >
-                <span className={styles.accountGreeting}>歡迎，{username}</span>
-                <span className={styles.accountCaret} aria-hidden="true">▾</span>
-              </button>
-              {accountMenuOpen && (
-                <div className={styles.accountDropdown}>
-                  <Link to="/app/dashboard" className={styles.enterAppButton} onClick={() => setAccountMenuOpen(false)}>
-                    進入基地
-                  </Link>
-                  <button type="button" className={styles.logoutButton} onClick={handleLogout}>
-                    登出
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <>
-              <Link to={{ pathname: '/signin', search: '?type=login' }} className={styles.loginBtn} onClick={close}>登入</Link>
-              <Link to={{ pathname: '/signin', search: '?type=register' }} className={styles.registerBtn} onClick={close}>註冊</Link>
-            </>
-          )}
+        <div className={`${styles.navBody} ${isMenuOpen ? styles.open : ''}`}>
+          <nav className={styles.primaryRail} aria-label="Public navigation">
+            {INTRODUCTION_ITEMS.map((item) => (
+              <NavLink key={item.key} to={item.to} onClick={collapseAllMenus}>
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+
+          <div className={styles.actionRail}>
+            {signedIn ? (
+              <div className={styles.accountMenu}>
+                <button
+                  type="button"
+                  className={styles.accountButton}
+                  onClick={() => setIsAccountOpen((prev) => !prev)}
+                  aria-expanded={isAccountOpen}
+                >
+                  <span className={styles.accountGreeting}>歡迎，{username}</span>
+                  <span className={styles.accountCaret} aria-hidden="true">▾</span>
+                </button>
+
+                {isAccountOpen && (
+                  <div className={styles.accountDropdown}>
+                    <Link to="/app/dashboard" className={styles.enterAppButton} onClick={collapseAllMenus}>
+                      進入基地
+                    </Link>
+                    <button type="button" className={styles.logoutButton} onClick={handleLogout}>
+                      登出
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              GUEST_ITEMS.map((item) => (
+                <Link
+                  key={item.key}
+                  to={item.to}
+                  className={styles[item.className]}
+                  onClick={collapseAllMenus}
+                >
+                  {item.label}
+                </Link>
+              ))
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </header>
   );
 }
