@@ -13,7 +13,7 @@
 }
 
 .outlayContainer {
-	min-height: calc(100vh - 80px);
+	min-height: calc(100vh - var(--public-nav-height, 84px));
 	display: grid;
 	grid-template-columns: minmax(210px, 280px) minmax(0, 1fr);
 	gap: 1.25rem;
@@ -28,7 +28,7 @@
 
 .switch {
 	position: sticky;
-	top: 96px;
+	top: calc(var(--public-nav-height, 84px) + 12px);
 	height: fit-content;
 	background: var(--docs-panel);
 	border: 1px solid var(--docs-border);
