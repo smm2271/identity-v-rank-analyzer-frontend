@@ -1,5 +1,5 @@
 import { useSearchParams, Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SigninNav from "../../share/signin-nav/signin-nav";
 import styles from "./signin.module.css";
 import Login from "./login/login";
@@ -16,6 +16,18 @@ export default function Signin() {
 
     const [oauthLoading, setOauthLoading] = useState<string | null>(null);
     const [oauthError, setOauthError] = useState<string | null>(null);
+
+    useEffect(() => {
+        document.body.classList.add("theme-signin");
+        document.body.classList.remove("theme-public");
+        document.documentElement.classList.add("theme-signin");
+        document.documentElement.classList.remove("theme-public");
+
+        return () => {
+            document.body.classList.remove("theme-signin");
+            document.documentElement.classList.remove("theme-signin");
+        };
+    }, []);
 
     async function handleOAuthLogin(provider: string) {
         setOauthLoading(provider);

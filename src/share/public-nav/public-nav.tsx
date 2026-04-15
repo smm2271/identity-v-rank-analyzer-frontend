@@ -58,6 +58,18 @@ export default function PublicNav() {
   }
 
   useEffect(() => {
+    document.body.classList.add('theme-public');
+    document.body.classList.remove('theme-signin');
+    document.documentElement.classList.add('theme-public');
+    document.documentElement.classList.remove('theme-signin');
+
+    return () => {
+      document.body.classList.remove('theme-public');
+      document.documentElement.classList.remove('theme-public');
+    };
+  }, []);
+
+  useEffect(() => {
     if (!navRef.current) return;
 
     const updateHeight = () => {

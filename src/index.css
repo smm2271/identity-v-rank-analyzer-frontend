@@ -7,6 +7,59 @@ body,
     height: 100%;
 }
 
+html.theme-public,
+body.theme-public {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 17, 50, 0.62) rgba(255, 255, 255, 0.08);
+}
+
+html.theme-signin,
+body.theme-signin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 194, 71, 0.62) rgba(255, 255, 255, 0.08);
+}
+
+html.theme-public::-webkit-scrollbar,
+body.theme-public::-webkit-scrollbar,
+html.theme-signin::-webkit-scrollbar,
+body.theme-signin::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+html.theme-public::-webkit-scrollbar-track,
+body.theme-public::-webkit-scrollbar-track,
+html.theme-signin::-webkit-scrollbar-track,
+body.theme-signin::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+html.theme-public::-webkit-scrollbar-thumb,
+body.theme-public::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(212, 17, 50, 0.75), rgba(168, 12, 36, 0.72));
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+html.theme-signin::-webkit-scrollbar-thumb,
+body.theme-signin::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(255, 194, 71, 0.75), rgba(255, 159, 26, 0.72));
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+html.theme-public::-webkit-scrollbar-thumb:hover,
+body.theme-public::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(212, 17, 50, 0.95), rgba(168, 12, 36, 0.88));
+}
+
+html.theme-signin::-webkit-scrollbar-thumb:hover,
+body.theme-signin::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(255, 194, 71, 0.95), rgba(255, 159, 26, 0.88));
+}
+
 * {
     margin: 0;
     padding: 0;
