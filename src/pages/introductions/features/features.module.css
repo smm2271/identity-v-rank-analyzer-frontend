@@ -1,3 +1,101 @@
-.content{
-    margin: calc(var(--public-nav-height, 84px) + 2rem) 4rem 4rem;
+.pageContainer {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 10% 0%, rgba(212, 17, 50, 0.2), transparent 38%),
+        radial-gradient(circle at 100% 100%, rgba(255, 136, 24, 0.16), transparent 40%),
+        #12090b;
+    color: #f0e8e8;
+}
+
+.mainContent {
+    width: min(1100px, 100%);
+    margin: 0 auto;
+    padding: calc(var(--public-nav-height, 84px) + 1.5rem) 1.25rem 2.5rem;
+    display: grid;
+    gap: 1.1rem;
+}
+
+.heroBlock {
+    padding: 1.4rem;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.24);
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.32rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #211503;
+    background: linear-gradient(120deg, #ffd57d, #ffaf2c);
+}
+
+.title {
+    margin: 0.9rem 0 0.35rem;
+    font-size: clamp(1.9rem, 2.4vw, 2.8rem);
+    line-height: 1.15;
+}
+
+.subtitle {
+    margin: 0;
+    color: #c8babd;
+    line-height: 1.7;
+}
+
+.featureGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.95rem;
+}
+
+.card {
+    padding: 1.25rem 1.35rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.card h2 {
+    margin: 0 0 0.6rem;
+    font-size: 1.28rem;
+    color: #fff;
+}
+
+.card p {
+    margin: 0;
+    line-height: 1.8;
+    color: #c8babd;
+}
+
+.flowList {
+    margin: 0;
+    padding-left: 1.2rem;
+    color: #c8babd;
+}
+
+.flowList li {
+    margin: 0.45rem 0;
+    line-height: 1.7;
+}
+
+@media (max-width: 1024px) {
+    .featureGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .mainContent {
+        padding: calc(var(--public-nav-height, 84px) + 1rem) 0.85rem 1.8rem;
+    }
+
+    .heroBlock,
+    .card {
+        border-radius: 14px;
+        padding: 1rem;
+    }
 }
