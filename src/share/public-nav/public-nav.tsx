@@ -28,7 +28,6 @@ const GUEST_ITEMS = [
 export default function PublicNav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
-  const [navHeight, setNavHeight] = useState(0);
   const navRef = useRef<HTMLElement | null>(null);
   const navigate = useNavigate();
   const token = useUserAuthStore((state) => state.accessToken);
@@ -75,7 +74,6 @@ export default function PublicNav() {
     const updateHeight = () => {
       if (!navRef.current) return;
       const height = Math.ceil(navRef.current.getBoundingClientRect().height);
-      setNavHeight(height);
       document.documentElement.style.setProperty('--public-nav-height', `${height}px`);
     };
 
@@ -92,85 +90,82 @@ export default function PublicNav() {
   }, []);
 
   return (
-    <>
-      <header ref={navRef} className={styles.publicNav}>
-        {isMenuOpen && (
+    <header ref={navRef} className={styles.publicNav}>
+      {isMenuOpen && (
+        <button
+          type="button"
+          className={styles.mobileMask}
+          onClick={collapseAllMenus}
+          aria-label="關閉選單"
+        />
+      )}
+
+      <div className={styles.navFrame}>
+        <div className={styles.brandRow}>
+          <Link to="/" className={styles.brandLink} onClick={collapseAllMenus}>
+            <h1>第五人格分析小工具</h1>
+          </Link>
           <button
             type="button"
-            className={styles.mobileMask}
-            onClick={collapseAllMenus}
-            aria-label="關閉選單"
-          />
-        )}
+            className={`${styles.burger} ${isMenuOpen ? styles.burgerOpen : ''}`}
+            onClick={() => setIsMenuOpen((prev) => !prev)}
+            aria-label="切換選單"
+            aria-expanded={isMenuOpen}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        </div>
 
-        <div className={styles.navFrame}>
-          <div className={styles.brandRow}>
-            <Link to="/" className={styles.brandLink} onClick={collapseAllMenus}>
-              <h1>第五人格分析小工具</h1>
-            </Link>
-            <button
-              type="button"
-              className={`${styles.burger} ${isMenuOpen ? styles.burgerOpen : ''}`}
-              onClick={() => setIsMenuOpen((prev) => !prev)}
-              aria-label="切換選單"
-              aria-expanded={isMenuOpen}
-            >
-              <span />
-              <span />
-              <span />
-            </button>
-          </div>
+        <div className={`${styles.navBody} ${isMenuOpen ? styles.open : ''}`}>
+          <nav className={styles.primaryRail} aria-label="Public navigation">
+            {INTRODUCTION_ITEMS.map((item) => (
+              <NavLink key={item.key} to={item.to} onClick={collapseAllMenus}>
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
 
-          <div className={`${styles.navBody} ${isMenuOpen ? styles.open : ''}`}>
-            <nav className={styles.primaryRail} aria-label="Public navigation">
-              {INTRODUCTION_ITEMS.map((item) => (
-                <NavLink key={item.key} to={item.to} onClick={collapseAllMenus}>
+          <div className={styles.actionRail}>
+            {signedIn ? (
+              <div className={styles.accountMenu}>
+                <button
+                  type="button"
+                  className={styles.accountButton}
+                  onClick={() => setIsAccountOpen((prev) => !prev)}
+                  aria-expanded={isAccountOpen}
+                >
+                  <span className={styles.accountGreeting}>歡迎，{username}</span>
+                  <span className={styles.accountCaret} aria-hidden="true">▾</span>
+                </button>
+
+                {isAccountOpen && (
+                  <div className={styles.accountDropdown}>
+                    <Link to="/app/dashboard" className={styles.enterAppButton} onClick={collapseAllMenus}>
+                      進入基地
+                    </Link>
+                    <button type="button" className={styles.logoutButton} onClick={handleLogout}>
+                      登出
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              GUEST_ITEMS.map((item) => (
+                <Link
+                  key={item.key}
+                  to={item.to}
+                  className={styles[item.className]}
+                  onClick={collapseAllMenus}
+                >
                   {item.label}
-                </NavLink>
-              ))}
-            </nav>
-
-            <div className={styles.actionRail}>
-              {signedIn ? (
-                <div className={styles.accountMenu}>
-                  <button
-                    type="button"
-                    className={styles.accountButton}
-                    onClick={() => setIsAccountOpen((prev) => !prev)}
-                    aria-expanded={isAccountOpen}
-                  >
-                    <span className={styles.accountGreeting}>歡迎，{username}</span>
-                    <span className={styles.accountCaret} aria-hidden="true">▾</span>
-                  </button>
-
-                  {isAccountOpen && (
-                    <div className={styles.accountDropdown}>
-                      <Link to="/app/dashboard" className={styles.enterAppButton} onClick={collapseAllMenus}>
-                        進入基地
-                      </Link>
-                      <button type="button" className={styles.logoutButton} onClick={handleLogout}>
-                        登出
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                GUEST_ITEMS.map((item) => (
-                  <Link
-                    key={item.key}
-                    to={item.to}
-                    className={styles[item.className]}
-                    onClick={collapseAllMenus}
-                  >
-                    {item.label}
-                  </Link>
-                ))
-              )}
-            </div>
+                </Link>
+              ))
+            )}
           </div>
         </div>
-      </header>
-      <div className={styles.navSpacer} style={navHeight > 0 ? { height: `${navHeight}px` } : undefined} aria-hidden="true" />
-    </>
+      </div>
+    </header>
   );
 }

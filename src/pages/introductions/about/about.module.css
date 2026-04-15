@@ -2,6 +2,7 @@
 
 .container {
     min-height: 100vh;
+    padding-top: calc(var(--public-nav-height, 84px) + 1rem);
     background-color: #1a0b0d;
     background-image:
         radial-gradient(at 0% 0%, hsla(353, 75%, 20%, 0.3) 0, transparent 50%),
