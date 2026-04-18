@@ -17,7 +17,7 @@
 	display: grid;
 	grid-template-columns: minmax(210px, 280px) minmax(0, 1fr);
 	gap: 1.25rem;
-	padding: calc(var(--public-nav-height, 84px) + 1.25rem) 1.25rem 1.25rem;
+	padding: calc(var(--public-nav-offset, var(--public-nav-height, 84px)) + 1.25rem) 1.25rem 1.25rem;
 	background:
 		radial-gradient(circle at 0% 0%, rgba(212, 17, 50, 0.22), transparent 45%),
 		radial-gradient(circle at 100% 100%, rgba(255, 135, 24, 0.18), transparent 40%),
@@ -28,7 +28,7 @@
 
 .switch {
 	position: sticky;
-	top: calc(var(--public-nav-height, 84px) + 12px);
+	top: calc(var(--public-nav-offset, var(--public-nav-height, 84px)) + 12px);
 	height: fit-content;
 	background: var(--docs-panel);
 	border: 1px solid var(--docs-border);

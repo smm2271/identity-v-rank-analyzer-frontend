@@ -1,7 +1,7 @@
 .home {
     background-color: #35191d;
     min-height: 100vh;
-    padding-top: var(--public-nav-height, 84px);
+    padding-top: var(--public-nav-offset, var(--public-nav-height, 84px));
 }
 
 .heroBanner {

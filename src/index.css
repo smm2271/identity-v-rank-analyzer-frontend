@@ -1,3 +1,14 @@
+:root {
+    --public-nav-height: 84px;
+    --public-nav-offset: calc(var(--public-nav-height) + env(safe-area-inset-top, 0px));
+}
+
+@media (max-width: 900px) {
+    :root {
+        --public-nav-height: 96px;
+    }
+}
+
 html,
 body,
 #root {
