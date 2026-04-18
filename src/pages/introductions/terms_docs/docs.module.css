@@ -273,7 +273,7 @@
 
 @media (max-width: 680px) {
 	.outlayContainer {
-		padding: 0.75rem;
+		padding: calc(var(--public-nav-offset, var(--public-nav-height, 84px)) + 0.75rem) 0.75rem 0.75rem;
 	}
 
 	.switch {

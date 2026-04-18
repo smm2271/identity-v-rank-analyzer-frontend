@@ -136,7 +136,7 @@
 
 @media (max-width: 768px) {
     .container {
-        padding: 1.5rem 1.5rem 3rem;
+        padding: calc(var(--public-nav-offset, var(--public-nav-height, 84px)) + 0.9rem) 1.5rem 3rem;
     }
 
     .about {
