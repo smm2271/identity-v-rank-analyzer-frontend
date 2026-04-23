@@ -78,7 +78,7 @@ export default function Signin() {
                     <div>
                         <p className={styles.version}>v1.0.0 測試版</p>
                         <h1>
-                            第五人格分析小工具
+                            第五人格戰積記錄分析小工具
                         </h1>
                         <p>從角色勝率到BP選擇。</p>
                         <p>千場對局，逐步分析，讓你看見個人趨勢。</p>

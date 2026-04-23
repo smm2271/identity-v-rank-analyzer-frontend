@@ -6,7 +6,7 @@ export default function About() {
         <>
             <PublicNav />
             <div className={styles.container}>
-                <h1 className={styles.title}>第五人格分析小工具</h1>
+                <h1 className={styles.title}>第五人格戰積記錄分析小工具</h1>
 
                 <div className={styles.about}>
                     <h2>專案動機</h2>

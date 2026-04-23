@@ -62,7 +62,7 @@ export default function PublicNav() {
     <div className={styles.publicNav}>
       <div className={styles.brandRow}>
         <Link to="/" onClick={closeMobileMenu}>
-          <h1>第五人格分析小工具</h1>
+          <h1>第五人格戰積記錄分析小工具</h1>
         </Link>
         <button
           type="button"
