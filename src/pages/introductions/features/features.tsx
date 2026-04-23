@@ -11,7 +11,7 @@ export default function Features() {
                     <p className={styles.badge}>Feature Overview</p>
                     <h1 className={styles.title}>功能介紹</h1>
                     <p className={styles.subtitle}>
-                        從對局錄像擷取資料，到視覺化分析與身份趨勢比較，協助你更快掌握自己的打法盲點與成長方向。
+                        從對局錄像擷取資料，到視覺化分析與陣營趨勢比較，協助你更快掌握自己的打法盲點與成長方向。
                     </p>
                 </header>
 
@@ -22,8 +22,8 @@ export default function Features() {
                     </article>
 
                     <article className={styles.card}>
-                        <h2>身份勝率比較</h2>
-                        <p>分開查看求生者與監管者的勝率、場次與趨勢，找出你在不同身份下的穩定度差異。</p>
+                        <h2>陣營勝率比較</h2>
+                        <p>分開查看求生者與監管者的勝率、場次與趨勢，找出你在不同陣營下的穩定度差異。</p>
                     </article>
 
                     <article className={styles.card}>
