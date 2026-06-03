@@ -1,0 +1,1928 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Identity V Rank Analyzer API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/auth/providers": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "列出可用的登入供應商",
+        "description": "回傳所有已註冊的 OAuth 供應商名稱及密碼登入是否啟用。\n\n(O) 開放封閉：供應商列表由 Factory 動態提供，新增供應商後此端點自動反映。",
+        "operationId": "list_providers_auth_providers_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProvidersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/{provider}/authorize": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "取得 OAuth 授權 URL",
+        "description": "產生指定 OAuth 供應商的授權 URL。\n\n(L) 里氏替換：無論是 Google 或 Discord，都透過相同的\n    OAuthLoginInterface.get_authorization_url() 呼叫，行為一致。\n\n前端應將使用者重導向至回傳的 authorization_url。\nstate 參數由後端產生，前端需在回呼時帶回以防 CSRF。",
+        "operationId": "oauth_authorize_auth__provider__authorize_get",
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Provider"
+            }
+          },
+          {
+            "name": "redirect_uri",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "OAuth 授權完成後的回呼 URL",
+              "title": "Redirect Uri"
+            },
+            "description": "OAuth 授權完成後的回呼 URL"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuthAuthorizeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/{provider}/callback": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "OAuth 回呼處理",
+        "description": "處理 OAuth 授權回呼。\n\n(S) 單一職責：本函式只做 HTTP 層的「請求解析 → 委派 Service → 回應組裝」。\n(L) 里氏替換：exchange_code / fetch_user_info 透過 OAuthLoginInterface 抽象呼叫，\n    Google 與 Discord 可無縫替換。\n(D) 依賴反轉：所有 Service 透過 Depends() 注入，不直接持有。\n\n流程：\n1. 以 authorization code 向供應商交換 tokens\n2. 以 access_token 取得使用者資訊\n3. 查詢 user_identities 是否已有此身份\n4. 若無 → 建立新使用者 + 身份\n5. 簽發 JWT access + refresh token",
+        "operationId": "oauth_callback_auth__provider__callback_get",
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Provider"
+            }
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "OAuth authorization code",
+              "title": "Code"
+            },
+            "description": "OAuth authorization code"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "CSRF state 參數",
+              "title": "State"
+            },
+            "description": "CSRF state 參數"
+          },
+          {
+            "name": "redirect_uri",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "與 authorize 時使用的相同回呼 URL",
+              "title": "Redirect Uri"
+            },
+            "description": "與 authorize 時使用的相同回呼 URL"
+          },
+          {
+            "name": "link_token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "待關聯 OAuth 流程 token（驗證模式使用）",
+              "title": "Link Token"
+            },
+            "description": "待關聯 OAuth 流程 token（驗證模式使用）"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/oauth-finalize": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "完成 OAuth 新用戶註冊",
+        "operationId": "oauth_finalize_auth_oauth_finalize_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OAuthFinalizeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/link-identity": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "關聯 OAuth 身分",
+        "operationId": "link_identity_auth_link_identity_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OAuthLinkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "以 Email + 密碼註冊",
+        "description": "以 Email + 密碼註冊新帳號。\n\n(S) 單一職責：本函式僅協調各 Service 完成註冊流程，\n    密碼強度驗證委派給 PasswordLoginProvider，\n    使用者建立委派給 UserService。\n(D) 依賴反轉：密碼供應商透過 factory.get_password() 取得，\n    不直接依賴 PasswordLoginProvider 具體類別。",
+        "operationId": "register_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "以 Email + 密碼登入",
+        "description": "以「Email 或 Username」+ 密碼登入。\n\n(S) 單一職責：本函式只負責 HTTP 層的流程協調，\n    帳密驗證完全委派給 PasswordLoginProvider.authenticate()。\n(D) 依賴反轉：密碼供應商透過 Factory 取得。\n\n安全考量：無論帳號不存在或密碼錯誤，統一回傳「帳號或密碼錯誤」，\n防止帳號列舉攻擊。",
+        "operationId": "login_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "以 Refresh Token 換發新 Token",
+        "description": "以 Refresh Token 換發新的 Access + Refresh Token 組合。\n\n(D) 依賴反轉：JWTService 與 UserService 透過 Depends() 注入。",
+        "operationId": "refresh_token_auth_refresh_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "登出（僅撤銷當前 Session）",
+        "description": "登出當前裝置，僅撤銷本次請求對應的 refresh token session。",
+        "operationId": "logout_auth_logout_post",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        }
+      }
+    },
+    "/users/me": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "取得當前使用者資料",
+        "description": "回傳當前已驗證使用者的基本資料。\n\n(D) 依賴反轉：使用者物件由 get_current_user 依賴注入，\n    不自行解析 token 或查詢資料庫。",
+        "operationId": "get_me_users_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me/identities": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "取得當前使用者的身份驗證來源",
+        "description": "回傳當前使用者已綁定的所有身份驗證來源。\n\n(S) 單一職責：僅協調 UserIdentityService 查詢，不含其他邏輯。\n(I) 介面隔離：只依賴 UserIdentityService，不依賴 JWTService 等不相關的 Service。\n\n例如使用者可能同時綁定了 Google、Discord 和密碼登入。",
+        "operationId": "get_my_identities_users_me_identities_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IdentityResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get My Identities Users Me Identities Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me/api-keys": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "列出當前使用者 API Keys（僅 Bearer）",
+        "description": "取得當前使用者所有 API Key 的 metadata。\n\n安全考量：列表不回傳明文 API Key。",
+        "operationId": "list_my_api_keys_users_me_api_keys_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ApiKeyListItemResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List My Api Keys Users Me Api Keys Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "申請 API Key（僅 Bearer）",
+        "description": "為當前使用者建立新的 API Key。\n\n僅接受 Bearer token 驗證（透過 get_current_user），\n建立後只回傳一次明文 API Key。",
+        "operationId": "create_my_api_key_users_me_api_keys_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiKeyCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyCreateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me/api-keys/{key_id}": {
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "停用 API Key（僅 Bearer）",
+        "description": "停用當前使用者名下的 API Key。",
+        "operationId": "deactivate_my_api_key_users_me_api_keys__key_id__delete",
+        "parameters": [
+          {
+            "name": "key_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "API Key UUID",
+              "title": "Key Id"
+            },
+            "description": "API Key UUID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/matches": {
+      "post": {
+        "tags": [
+          "matches"
+        ],
+        "summary": "上傳對戰紀錄",
+        "description": "上傳一筆遊戲對戰紀錄，需包含認知分更新資訊。可透過 X-API-Key 或 Authorization Bearer 驗證。",
+        "operationId": "upload_match_api_v1_matches_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatchUploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "matches"
+        ],
+        "summary": "取得我的對戰紀錄列表",
+        "description": "取得當前使用者上傳的所有對戰紀錄（分頁）。可透過 X-API-Key 或 Authorization Bearer 驗證。",
+        "operationId": "list_my_matches_api_v1_matches_get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/matches/{match_id}": {
+      "get": {
+        "tags": [
+          "matches"
+        ],
+        "summary": "取得對戰紀錄詳情",
+        "description": "取得單筆對戰紀錄（含玩家資訊）。可透過 X-API-Key 或 Authorization Bearer 驗證，且僅能查看自己上傳的紀錄。",
+        "operationId": "get_match_detail_api_v1_matches__match_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "match_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Match Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/matches/ladder-scores/latest": {
+      "get": {
+        "tags": [
+          "matches"
+        ],
+        "summary": "取得最新認知分",
+        "description": "取得當前使用者各角色最新的認知分紀錄。可透過 X-API-Key 或 Authorization Bearer 驗證。",
+        "operationId": "get_latest_ladder_scores_api_v1_matches_ladder_scores_latest_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LatestLadderScoresResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/api/v1/matches/ladder-scores/{pid}": {
+      "get": {
+        "tags": [
+          "matches"
+        ],
+        "summary": "取得認知分歷史",
+        "description": "取得當前使用者指定角色的認知分變化歷史（最新優先）。可透過 X-API-Key 或 Authorization Bearer 驗證。",
+        "operationId": "get_ladder_score_history_api_v1_matches_ladder_scores__pid__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "description": "角色 ID",
+              "title": "Pid"
+            },
+            "description": "角色 ID"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "description": "最多回傳筆數",
+              "default": 100,
+              "title": "Limit"
+            },
+            "description": "最多回傳筆數"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LadderScoresListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Read Root",
+        "operationId": "read_root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiKeyCreateRequest": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "API Key 顯示名稱（方便管理）"
+          }
+        },
+        "type": "object",
+        "title": "ApiKeyCreateRequest",
+        "description": "建立 API Key 請求"
+      },
+      "ApiKeyCreateResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "api_key": {
+            "type": "string",
+            "title": "Api Key"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "api_key",
+          "is_active",
+          "created_at"
+        ],
+        "title": "ApiKeyCreateResponse",
+        "description": "建立 API Key 回應（只在建立當下回傳明文 key）"
+      },
+      "ApiKeyListItemResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "is_active",
+          "last_used_at",
+          "created_at"
+        ],
+        "title": "ApiKeyListItemResponse",
+        "description": "API Key 列表項目（不回傳明文 key）"
+      },
+      "AuthUserBasic": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "email"
+        ],
+        "title": "AuthUserBasic",
+        "description": "登入後前端顯示用的最小使用者資訊"
+      },
+      "CharacterLadderScoreResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "pid": {
+            "type": "integer",
+            "title": "Pid"
+          },
+          "score": {
+            "type": "integer",
+            "title": "Score"
+          },
+          "recorded_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Recorded At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "pid",
+          "score",
+          "recorded_at"
+        ],
+        "title": "CharacterLadderScoreResponse",
+        "description": "認知分紀錄回應"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "IdentityResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "provider_key": {
+            "type": "string",
+            "title": "Provider Key"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "provider",
+          "provider_key"
+        ],
+        "title": "IdentityResponse",
+        "description": "身份驗證來源回應"
+      },
+      "LadderScoreInfo": {
+        "properties": {
+          "pid": {
+            "type": "integer",
+            "title": "Pid",
+            "description": "角色 ID"
+          },
+          "score": {
+            "type": "integer",
+            "title": "Score",
+            "description": "當前認知分"
+          }
+        },
+        "type": "object",
+        "required": [
+          "pid",
+          "score"
+        ],
+        "title": "LadderScoreInfo",
+        "description": "認知分資訊（場次相關的認知分變化）"
+      },
+      "LadderScoresListResponse": {
+        "properties": {
+          "pid": {
+            "type": "integer",
+            "title": "Pid"
+          },
+          "scores": {
+            "items": {
+              "$ref": "#/components/schemas/CharacterLadderScoreResponse"
+            },
+            "type": "array",
+            "title": "Scores"
+          }
+        },
+        "type": "object",
+        "required": [
+          "pid",
+          "scores"
+        ],
+        "title": "LadderScoresListResponse",
+        "description": "認知分列表回應"
+      },
+      "LatestLadderScoresResponse": {
+        "properties": {
+          "latest_scores": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CharacterLadderScoreResponse"
+            },
+            "type": "object",
+            "title": "Latest Scores"
+          }
+        },
+        "type": "object",
+        "required": [
+          "latest_scores"
+        ],
+        "title": "LatestLadderScoresResponse",
+        "description": "最新認知分回應"
+      },
+      "LoginRequest": {
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Identifier",
+            "description": "電子郵件或使用者名稱"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "identifier",
+          "password"
+        ],
+        "title": "LoginRequest",
+        "description": "密碼登入請求"
+      },
+      "MatchDetailResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "room_guuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Room Guuid"
+          },
+          "uploader_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Uploader Id"
+          },
+          "scene_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scene Id"
+          },
+          "match_type": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Type"
+          },
+          "rank_level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rank Level"
+          },
+          "kill_num": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kill Num"
+          },
+          "utype": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Utype"
+          },
+          "pid": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pid"
+          },
+          "game_save_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Game Save Time"
+          },
+          "cipher_progress": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cipher Progress"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "players": {
+            "items": {
+              "$ref": "#/components/schemas/PlayerInfoResponse"
+            },
+            "type": "array",
+            "title": "Players",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "room_guuid",
+          "uploader_id",
+          "scene_id",
+          "match_type",
+          "rank_level",
+          "kill_num",
+          "utype",
+          "pid",
+          "game_save_time",
+          "cipher_progress",
+          "created_at"
+        ],
+        "title": "MatchDetailResponse",
+        "description": "包含玩家資訊的對戰紀錄回應。\n\n(O) 開閉原則：透過繼承 MatchResponse 擴展 players 欄位，\n而非修改基底 Schema。"
+      },
+      "MatchListResponse": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MatchResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "offset",
+          "limit",
+          "items"
+        ],
+        "title": "MatchListResponse",
+        "description": "對戰紀錄列表回應（含分頁資訊）"
+      },
+      "MatchResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "room_guuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Room Guuid"
+          },
+          "uploader_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Uploader Id"
+          },
+          "scene_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scene Id"
+          },
+          "match_type": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Type"
+          },
+          "rank_level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rank Level"
+          },
+          "kill_num": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kill Num"
+          },
+          "utype": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Utype"
+          },
+          "pid": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pid"
+          },
+          "game_save_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Game Save Time"
+          },
+          "cipher_progress": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cipher Progress"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "room_guuid",
+          "uploader_id",
+          "scene_id",
+          "match_type",
+          "rank_level",
+          "kill_num",
+          "utype",
+          "pid",
+          "game_save_time",
+          "cipher_progress",
+          "created_at"
+        ],
+        "title": "MatchResponse",
+        "description": "對戰紀錄回應"
+      },
+      "MatchUploadRequest": {
+        "properties": {
+          "room_guuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Room Guuid",
+            "description": "房間 UUID"
+          },
+          "scene_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scene Id",
+            "description": "地圖 ID"
+          },
+          "match_type": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Type",
+            "description": "對戰類型 (1:排位, 2:匹配, 3:五人制)"
+          },
+          "rank_level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rank Level",
+            "description": "當時段位"
+          },
+          "kill_num": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kill Num",
+            "description": "擊殺數"
+          },
+          "utype": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Utype",
+            "description": "角色類型 (1:監管 2:求生)"
+          },
+          "pid": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pid",
+            "description": "我方角色 ID"
+          },
+          "game_save_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Game Save Time",
+            "description": "遊戲結束時間"
+          },
+          "cipher_progress": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cipher Progress",
+            "description": "各台密碼機修機進度"
+          },
+          "players": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/PlayerInfoCreate"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Players",
+            "description": "對局玩家資料"
+          },
+          "ladder_score_info": {
+            "items": {
+              "$ref": "#/components/schemas/LadderScoreInfo"
+            },
+            "type": "array",
+            "title": "Ladder Score Info",
+            "description": "本場對局涉及的認知分更新（必填）"
+          }
+        },
+        "type": "object",
+        "required": [
+          "room_guuid",
+          "ladder_score_info"
+        ],
+        "title": "MatchUploadRequest",
+        "description": "對戰紀錄上傳請求"
+      },
+      "MessageResponse": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "MessageResponse",
+        "description": "通用訊息回應"
+      },
+      "OAuthAuthorizeResponse": {
+        "properties": {
+          "authorization_url": {
+            "type": "string",
+            "title": "Authorization Url"
+          },
+          "state": {
+            "type": "string",
+            "title": "State"
+          }
+        },
+        "type": "object",
+        "required": [
+          "authorization_url",
+          "state"
+        ],
+        "title": "OAuthAuthorizeResponse",
+        "description": "OAuth 授權 URL 回應"
+      },
+      "OAuthFinalizeRequest": {
+        "properties": {
+          "registration_token": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Registration Token",
+            "description": "OAuth 註冊暫存 token"
+          },
+          "username": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Username",
+            "description": "使用者名稱"
+          },
+          "terms_accepted": {
+            "type": "boolean",
+            "enum": [true],
+            "const": true,
+            "title": "Terms Accepted",
+            "description": "必須同意服務條款與隱私政策"
+          }
+        },
+        "type": "object",
+        "required": [
+          "registration_token",
+          "username",
+          "terms_accepted"
+        ],
+        "title": "OAuthFinalizeRequest",
+        "description": "OAuth 新用戶完成註冊請求"
+      },
+      "OAuthLinkRequest": {
+        "properties": {
+          "link_token": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Link Token",
+            "description": "OAuth 關聯暫存 token"
+          },
+          "identifier": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Identifier",
+            "description": "原帳號電子郵件或使用者名稱"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Password",
+            "description": "原帳號密碼"
+          }
+        },
+        "type": "object",
+        "required": [
+          "link_token",
+          "identifier",
+          "password"
+        ],
+        "title": "OAuthLinkRequest",
+        "description": "OAuth 帳號關聯請求"
+      },
+      "PlayerInfoCreate": {
+        "properties": {
+          "player_id": {
+            "type": "integer",
+            "title": "Player Id",
+            "description": "玩家 ID"
+          },
+          "player_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 14
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Name",
+            "description": "玩家名稱"
+          },
+          "character_id": {
+            "type": "integer",
+            "title": "Character Id",
+            "description": "角色 ID"
+          },
+          "res_type": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Res Type",
+            "description": "逃脫狀態"
+          }
+        },
+        "type": "object",
+        "required": [
+          "player_id",
+          "character_id"
+        ],
+        "title": "PlayerInfoCreate",
+        "description": "單一玩家資訊（嵌入於對戰上傳請求中）"
+      },
+      "PlayerInfoResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "player_id": {
+            "type": "integer",
+            "title": "Player Id"
+          },
+          "player_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Name"
+          },
+          "character_id": {
+            "type": "integer",
+            "title": "Character Id"
+          },
+          "res_type": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Res Type"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "player_id",
+          "player_name",
+          "character_id",
+          "res_type",
+          "created_at"
+        ],
+        "title": "PlayerInfoResponse",
+        "description": "玩家資訊回應"
+      },
+      "ProvidersResponse": {
+        "properties": {
+          "oauth_providers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Oauth Providers"
+          },
+          "password_enabled": {
+            "type": "boolean",
+            "title": "Password Enabled"
+          }
+        },
+        "type": "object",
+        "required": [
+          "oauth_providers",
+          "password_enabled"
+        ],
+        "title": "ProvidersResponse",
+        "description": "可用的登入供應商列表回應"
+      },
+      "RegisterRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "title": "Password",
+            "description": "密碼，至少 8 字元"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username",
+            "description": "使用者名稱"
+          },
+          "terms_accepted": {
+            "type": "boolean",
+            "enum": [true],
+            "const": true,
+            "title": "Terms Accepted",
+            "description": "必須同意服務條款與隱私政策"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password",
+          "terms_accepted"
+        ],
+        "title": "RegisterRequest",
+        "description": "密碼註冊請求"
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "user": {
+            "$ref": "#/components/schemas/AuthUserBasic"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "Bearer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "user"
+        ],
+        "title": "TokenResponse",
+        "description": "登入成功回應（refresh token 由 HttpOnly Cookie 傳遞）"
+      },
+      "UserResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "token_ver": {
+            "type": "integer",
+            "title": "Token Ver"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "email",
+          "created_at",
+          "token_ver"
+        ],
+        "title": "UserResponse",
+        "description": "使用者資料回應"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "APIKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    }
+  }
+}
